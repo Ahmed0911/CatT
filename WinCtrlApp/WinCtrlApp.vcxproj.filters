@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="SerialLora">
+      <UniqueIdentifier>{05604701-2028-42db-8a6a-165c48e7c354}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="H264Decoder">
+      <UniqueIdentifier>{cae859dc-3f5b-4bdb-b3bc-c4c6772e7fdd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinCtrlApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CVideoScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialCommLora\Comm433MHz.h">
+      <Filter>SerialLora</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialCommLora\CommMgr.h">
+      <Filter>SerialLora</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialCommLora\CRC32.h">
+      <Filter>SerialLora</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialCommLora\Serial.h">
+      <Filter>SerialLora</Filter>
+    </ClInclude>
+    <ClInclude Include="SerialCommLora\SerialComm.h">
+      <Filter>SerialLora</Filter>
+    </ClInclude>
+    <ClInclude Include="H264Decoder\H264Decoder.h">
+      <Filter>H264Decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="H264Decoder\MPEGTSDecoder.h">
+      <Filter>H264Decoder</Filter>
+    </ClInclude>
+    <ClInclude Include="CMultiCastTSStreamInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WinCtrlApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CVideoScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialCommLora\Comm433MHz.cpp">
+      <Filter>SerialLora</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialCommLora\CommMgr.cpp">
+      <Filter>SerialLora</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialCommLora\CRC32.cpp">
+      <Filter>SerialLora</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialCommLora\Serial.cpp">
+      <Filter>SerialLora</Filter>
+    </ClCompile>
+    <ClCompile Include="SerialCommLora\SerialComm.cpp">
+      <Filter>SerialLora</Filter>
+    </ClCompile>
+    <ClCompile Include="H264Decoder\H264Decoder.cpp">
+      <Filter>H264Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="H264Decoder\MPEGTSDecoder.cpp">
+      <Filter>H264Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="CMultiCastTSStreamInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="WinCtrlApp.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="WinCtrlApp.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="H264Decoder\ColorSpace.cu">
+      <Filter>H264Decoder</Filter>
+    </CudaCompile>
+  </ItemGroup>
+</Project>
