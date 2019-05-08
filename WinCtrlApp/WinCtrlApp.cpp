@@ -295,16 +295,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow, LPWSTR lpCmdLine)
    APPWIN32_CK(g_hWndControlFrame != NULL, "Control Panel Fail");
 
    // Create Buttons
-   CreateWindow(L"BUTTON", L"OFF", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 50, 50, 100, 30, g_hWndControlFrame, (HMENU)ID_BUTTONOFF, hInstance, nullptr);
-   CreateWindow(L"BUTTON", L"ARM", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 50, 100, 100, 30, g_hWndControlFrame, (HMENU)ID_BUTTONARM, hInstance, nullptr);
-   CreateWindow(L"BUTTON", L"ACTIVATE", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 50, 150, 100, 30, g_hWndControlFrame, (HMENU)ID_BUTTONACTIVATE, hInstance, nullptr);
+   CreateWindow(L"BUTTON", L"OFF", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 10, 5, 100, 30, g_hWndControlFrame, (HMENU)ID_BUTTONOFF, hInstance, nullptr);
+   CreateWindow(L"BUTTON", L"ARM", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 150, 5, 100, 30, g_hWndControlFrame, (HMENU)ID_BUTTONARM, hInstance, nullptr);
+   CreateWindow(L"BUTTON", L"ACTIVATE", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 300, 5, 100, 30, g_hWndControlFrame, (HMENU)ID_BUTTONACTIVATE, hInstance, nullptr);
 
    // Create Text Boxes
-   CreateWindow(L"STATIC", L"STATE", WS_CHILD | WS_VISIBLE, 80, 260, 100, 30, g_hWndControlFrame, nullptr, hInstance, nullptr);
-   CreateWindow(L"EDIT", L"OFF", WS_CHILD | WS_VISIBLE | WS_BORDER, 60, 290, 100, 30, g_hWndControlFrame, (HMENU)ID_TEXTSTATE, hInstance, nullptr);
+   CreateWindow(L"STATIC", L"STATE", WS_CHILD | WS_VISIBLE, 500, 10, 100, 20, g_hWndControlFrame, nullptr, hInstance, nullptr);
+   CreateWindow(L"EDIT", L"OFF", WS_CHILD | WS_VISIBLE | WS_BORDER, 550, 10, 100, 20, g_hWndControlFrame, (HMENU)ID_TEXTSTATE, hInstance, nullptr);
 
-   CreateWindow(L"STATIC", L"DETECTOR", WS_CHILD | WS_VISIBLE, 70, 360, 100, 30, g_hWndControlFrame, nullptr, hInstance, nullptr);
-   CreateWindow(L"EDIT", L"INACTIVE", WS_CHILD | WS_VISIBLE | WS_BORDER, 60, 390, 100, 30, g_hWndControlFrame, (HMENU)ID_TEXTDETECTOR, hInstance, nullptr);
+   CreateWindow(L"STATIC", L"DETECTOR", WS_CHILD | WS_VISIBLE, 750, 10, 100, 20, g_hWndControlFrame, nullptr, hInstance, nullptr);
+   CreateWindow(L"EDIT", L"INACTIVE", WS_CHILD | WS_VISIBLE | WS_BORDER, 830, 10, 100, 20, g_hWndControlFrame, (HMENU)ID_TEXTDETECTOR, hInstance, nullptr);
 
 
    // Create Main Objects: Video Screen
@@ -347,15 +347,15 @@ void RecomposeMainWindow(HWND hWnd)
 	GetClientRect(hWnd, &rc);
 
 	// defines
-	int ControlFrameMinWidth = 200;
+	int ControlFrameMinHeight = 30;
 
 	// 3. Video Frame
 	// get aspect ratio
 	float ar = g_VideoScreen->GetVideoAspectRatio();
-	int maximumVideoWidth = (rc.right - rc.left) - ControlFrameMinWidth;
+	int maximumVideoWidth = (rc.right - rc.left);
 	if (maximumVideoWidth < 0) maximumVideoWidth = 0; // check minimum size
 
-	int maximumVideoHeight = (rc.bottom - rc.top);
+	int maximumVideoHeight = (rc.bottom - rc.top) - ControlFrameMinHeight;
 	if (maximumVideoHeight < 0) maximumVideoHeight = 0; // check minimum size
 
 	int videoWidth = maximumVideoWidth;
@@ -369,7 +369,7 @@ void RecomposeMainWindow(HWND hWnd)
 	SetWindowPos(g_hWndVideoFrame, HWND_BOTTOM, 0, 0, videoWidth, videoHeight, 0);
 
 	// 4. Control Panel
-	SetWindowPos(g_hWndControlFrame, HWND_BOTTOM, videoWidth, 0, rc.right - videoWidth, videoHeight, 0);
+	SetWindowPos(g_hWndControlFrame, HWND_BOTTOM, 0, videoHeight, videoWidth, rc.bottom - videoHeight, 0);
 
 	g_VideoScreen->ResizeWindow(g_hWndVideoFrame);
 }

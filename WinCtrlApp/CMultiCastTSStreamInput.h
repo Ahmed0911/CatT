@@ -9,7 +9,7 @@
 
 #define MULTICAST_PORT 20000
 #define MULTICAST_IP "224.1.2.3"
-#define LOCAL_IP "192.168.0.19"
+#define LOCAL_IP "192.168.53.20"
 #define MAX_QUEUE_SIZE 100
 
 class CMultiCastTSStreamInput
