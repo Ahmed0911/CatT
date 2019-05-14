@@ -171,11 +171,11 @@ void main(void)
         //pwmOut.SetWidthUS(0, PWMVAL);
         if( GlobalData.TrapState == Activated)
         {
-            pwmOut.SetWidthUS(0, 2200);
+            pwmOut.SetWidthUS(0, 2000);
         }
         else
         {
-            pwmOut.SetWidthUS(0, 1650);
+            pwmOut.SetWidthUS(0, 0); // manual control - door close
         }
 
 		// Send Data
