@@ -20,7 +20,7 @@ PAGE="""\
 <body>
 <center><img src="stream.mjpg" width="1296" height="972"></center>
 <center><form action="/" method="post">
-<button style="width:500px;height:300px; type="submit" name="submit" value="Release">RELEASE</button></form></center>
+<button style="width:500px;height:300px; type="submit" name="submit" value="Release">CATCH THEM ALL</button></form></center>
 </body>
 </html>
 """
