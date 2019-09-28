@@ -3,6 +3,9 @@
 
 #include "framework.h"
 #include "VSMonitorApp.h"
+#include "CVideoScreen.h"
+#include "AppException.h"
+#include <fstream>
 
 #define MAX_LOADSTRING 100
 
@@ -10,6 +13,10 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+
+// Global Objects
+std::unique_ptr<CVideoScreen> g_VideoScreen;
+HWND g_hWnd;
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -25,32 +32,78 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: Place code here.
+	MSG msg = { 0 };
 
-    // Initialize global strings
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_VSMONITORAPP, szWindowClass, MAX_LOADSTRING);
-    MyRegisterClass(hInstance);
+	try
+	{
 
-    // Perform application initialization:
-    if (!InitInstance (hInstance, nCmdShow))
-    {
-        return FALSE;
-    }
+		// Initialize global strings
+		LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+		LoadStringW(hInstance, IDC_VSMONITORAPP, szWindowClass, MAX_LOADSTRING);
+		MyRegisterClass(hInstance);
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VSMONITORAPP));
+		// Perform application initialization:
+		if (!InitInstance(hInstance, nCmdShow))
+		{
+			return FALSE;
+		}
 
-    MSG msg;
+		HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VSMONITORAPP));
 
-    // Main message loop:
-    while (GetMessage(&msg, nullptr, 0, 0))
-    {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
+		
+
+		// render messaging loop
+		while (msg.message != WM_QUIT)
+		{
+			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			{
+				if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg) && !((GetKeyState(VK_SHIFT) & 0x8000) && msg.message == WM_KEYDOWN)) // prevent label def list to get keydown messages when CTRL is pressed
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+			}
+			else
+			{
+				// 1. Get new data/image
+
+				// 2. Set new data
+
+
+				// Draw in main/render loop
+				InvalidateRect(msg.hwnd, NULL, FALSE);
+				UpdateWindow(g_hWnd); // redraw NOW
+
+
+				// XXX: DEBUG :XXX
+				std::wstring windowText;
+				windowText += L"   RenderTime: ";
+				windowText += std::to_wstring((int)g_VideoScreen->GetScreenTimeMSec());
+				SetWindowText(g_hWnd, windowText.c_str());
+
+				Sleep(1); // TODO: do not hang in minimized state?
+			}
+		};
+	}
+	catch (const std::exception& ex)
+	{
+		// Log to logfile
+		std::ofstream logFile("error.log", std::ofstream::app);
+
+		CHAR dateStr[100];
+		CHAR timeStr[100];
+		GetDateFormatA(LOCALE_SYSTEM_DEFAULT, 0, NULL, "yyyy-MM-dd", dateStr, 100);
+		GetTimeFormatA(LOCALE_SYSTEM_DEFAULT, 0, NULL, "HH:mm:ss", timeStr, 100);
+
+		std::string crashDate = std::string(dateStr) + " " + std::string(timeStr);
+		logFile << "--------------------------------------------------------" << std::endl;
+		logFile << crashDate << std::endl;
+		logFile << "Application Crash!!!  ";
+		logFile << ex.what() << std::endl;
+		logFile.close();
+
+		FatalAppExitA(0, ex.what());
+	}
 
     return (int) msg.wParam;
 }
@@ -76,7 +129,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_VSMONITORAPP));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_VSMONITORAPP);
+	wcex.lpszMenuName	= NULL;// MAKEINTRESOURCEW(IDC_VSMONITORAPP);
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -97,16 +150,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // Store instance handle in our global variable
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+   g_hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+   APPWIN32_CK(g_hWnd != NULL, "Main CreateWindow Failed");
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+   // Create Main Objects: Video Screen
+   g_VideoScreen = std::make_unique<CVideoScreen>();
+   g_VideoScreen->Init(g_hWnd);
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+   ShowWindow(g_hWnd, nCmdShow);
+   UpdateWindow(g_hWnd);
 
    return TRUE;
 }
@@ -131,9 +183,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Parse the menu selections:
             switch (wmId)
             {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -142,39 +191,51 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+
+	case WM_KEYDOWN:
+		{
+			if (wParam == 'X')
+			{
+				SetWindowLongPtr(g_hWnd, GWL_STYLE, WS_POPUP);
+				SetWindowPos(g_hWnd, 0, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), SWP_SHOWWINDOW);
+
+			}
+			if (wParam == 'Z')
+			{
+				SetWindowLongPtr(g_hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+				SetWindowPos(g_hWnd, 0, 200, 200, 1920, 1080, SWP_SHOWWINDOW);
+			}
+		}
+		break;
+
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
+			g_VideoScreen->Draw(hdc, hWnd);
             EndPaint(hWnd, &ps);
         }
         break;
+
+	case WM_SIZE:
+	{
+		// Recompose main window
+		if (wParam != SIZE_MINIMIZED)
+		{
+			if (g_VideoScreen)
+			{
+				g_VideoScreen->ResizeWindow(hWnd);
+			}
+		}
+	}
+	break;
+
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
     return 0;
-}
-
-// Message handler for about box.
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
-
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
 }

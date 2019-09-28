@@ -118,13 +118,13 @@ void CVideoScreen::Draw(HDC hdc, HWND hWnd)
 	m_screenTimerTmr.Start(); // start measurement
 
 	m_pRT->BeginDraw();
-	m_pRT->Clear(D2D1::ColorF(D2D1::ColorF::White));
+	m_pRT->Clear(D2D1::ColorF(D2D1::ColorF::LightBlue));
 
 	// Draw Map - Fullscreen
-	m_pRT->SetTransform(D2D1::Matrix3x2F::Scale((float)m_ScreenSize.width/ 1920, (float)m_ScreenSize.height / 1080) ); // rescale to full screen
+	//m_pRT->SetTransform(D2D1::Matrix3x2F::Scale((float)m_ScreenSize.width/ 1920, (float)m_ScreenSize.height / 1080) ); // rescale to full screen
 
 
-#if 0 
+#if 1
 	// Draw Video Image 
 	// 1. Calculate view size (part of VideoFrame that will be copied to screen) (will be clipped later if needed)
 	D2D1_SIZE_F viewSize;
