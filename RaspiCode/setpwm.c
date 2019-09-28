@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
         int position = 15; // middle
         if( argc > 1 )
         {
-                // extarct position
+                // extact position
                 position = atoi(argv[1]);
         }
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         delay(1000);
 
         // kill
-        // does not work with  G-SUN, must cycle power
-        //softPwmWrite(PWM_pin, 0);
-        //delay(100);
+        // NOTE: does not work with  G-SUN, must cycle power
+        softPwmWrite(PWM_pin, 0);
+        delay(100);
 }
