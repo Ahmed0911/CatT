@@ -1,7 +1,6 @@
 #pragma once
 #include "CTimer.h"
 #include <string>
-#include "CMap.h"
 
 #define BORDER_SIZE 20
 
@@ -18,9 +17,6 @@ public:
 	double GetScreenTimeMSec();
 	float GetVideoAspectRatio();
 	D2D1_SIZE_F GetVideoToScreenRatio();
-
-	// Get Map
-	std::unique_ptr<CMap>& GetMap();
 
 	// Mouse handling
 	void HandleMouse(EMouseEvents mEvent, int32_t x = 0, int32_t y = 0, int32_t wheelDelta = 0);
@@ -70,9 +66,6 @@ private:
 
 	ID2D1Bitmap* m_pVideoFrame = NULL;
 	ID2D1SolidColorBrush* m_pLabelBrush = NULL;
-
-	// Map stuff
-	std::unique_ptr<CMap> m_Map;
 
 public:
 	CVideoScreen();

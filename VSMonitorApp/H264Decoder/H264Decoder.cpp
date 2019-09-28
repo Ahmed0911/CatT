@@ -157,7 +157,7 @@ bool H264Decoder::Decode(uint8_t* Buffer, uint32_t Length)
 			mfxU16 height = (mfxU16)MSDK_ALIGN32(Request.Info.Height);
 			mfxU8 bitsPerPixel = 12;        // NV12 format is a 12 bits per pixel format
 			mfxU32 surfaceSize = width * height * bitsPerPixel / 8;
-			mfxU8* m_surfaceBuffers = (mfxU8*) new mfxU8[surfaceSize * m_numSurfaces];
+			mfxU8* m_surfaceBuffers = (mfxU8*) new mfxU8[(uint64_t)surfaceSize * (uint64_t)m_numSurfaces];
 
 			// Allocate surface headers (mfxFrameSurface1) for decoder
 			m_pmfxSurfaces = new mfxFrameSurface1 *[m_numSurfaces];
@@ -172,7 +172,7 @@ bool H264Decoder::Decode(uint8_t* Buffer, uint32_t Length)
 				memset(m_pmfxSurfaces[i], 0, sizeof(mfxFrameSurface1));
 				memcpy(&(m_pmfxSurfaces[i]->Info), &(mfxVideoParams.mfx.FrameInfo), sizeof(mfxFrameInfo));
 				m_pmfxSurfaces[i]->Data.Y = &m_surfaceBuffers[surfaceSize * i];
-				m_pmfxSurfaces[i]->Data.U = m_pmfxSurfaces[i]->Data.Y + width * height;
+				m_pmfxSurfaces[i]->Data.U = m_pmfxSurfaces[i]->Data.Y + (uint64_t)width * (uint64_t)height;
 				m_pmfxSurfaces[i]->Data.V = m_pmfxSurfaces[i]->Data.U + 1;
 				m_pmfxSurfaces[i]->Data.Pitch = width;
 			}
@@ -192,7 +192,7 @@ bool H264Decoder::Decode(uint8_t* Buffer, uint32_t Length)
 
 			// Allocate conversion Buffers
 			uint64_t nv12FrameSize = surfaceSize;
-			uint64_t rgbaFrameSize = width * height * 4;
+			uint64_t rgbaFrameSize = (int64_t)width * (int64_t)height * 4;
 			cuMemAlloc(&m_pNV12GPU, nv12FrameSize); // NV12 Source buffer in GPU Memory
 			cuMemAlloc(&m_pRGBAGPU, rgbaFrameSize); // RGBA Destination buffer in GPU Memory
 			cudaHostAlloc((void**)&m_pRGBAImage, rgbaFrameSize, cudaHostRegisterDefault); // RGBA Destination buffer in CPU Memory
@@ -277,7 +277,7 @@ void H264Decoder::ConvertToRGBA(mfxFrameSurface1* nv12Surface)
 	// Convert Image
 	// 1. Copy to GPU
 	uint64_t nv12FrameSize = (ImageWidth * ImageHeight * 12) / 8;
-	uint64_t rgbaFrameSize = ImageWidth * ImageHeight * 4;
+	uint64_t rgbaFrameSize = ((uint64_t)ImageWidth * (uint64_t)ImageHeight * 4);
 	cuMemcpyHtoD(m_pNV12GPU, nv12Surface->Data.Y, nv12FrameSize);
 
 	// 2. Execute CUDA

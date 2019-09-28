@@ -13,3 +13,18 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+
+// Direct2D
+#include <D2d1_1.h>
+#include <D2d1helper.h>
+#include <Dwrite.h>
+
+
+template <class T> void SafeRelease(T** ppT)
+{
+	if (*ppT)
+	{
+		(*ppT)->Release();
+		*ppT = NULL;
+	}
+}

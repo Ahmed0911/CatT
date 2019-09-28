@@ -1,8 +1,7 @@
-#include "stdafx.h"
+#include "framework.h"
 #include "CTimer.h"
 
-
-CTimer::CTimer()
+CTimer::CTimer() : m_ElapsedTimeS(0), m_StartingTime(LARGE_INTEGER())
 {
 	// get frequency
 	QueryPerformanceFrequency(&m_Frequency);

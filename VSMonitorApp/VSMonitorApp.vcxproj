@@ -70,6 +70,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>cuda.lib;cudart_static.lib;d2d1.lib;dwrite.lib;ws2_32.lib;libmfx_vs2015.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -92,9 +93,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>cuda.lib;cudart_static.lib;d2d1.lib;dwrite.lib;ws2_32.lib;libmfx_vs2015.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AppException.h" />
+    <ClInclude Include="CTimer.h" />
+    <ClInclude Include="CVideoScreen.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="H264Decoder\H264Decoder.h" />
     <ClInclude Include="Resource.h" />
@@ -102,6 +107,8 @@
     <ClInclude Include="VSMonitorApp.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CTimer.cpp" />
+    <ClCompile Include="CVideoScreen.cpp" />
     <ClCompile Include="H264Decoder\H264Decoder.cpp" />
     <ClCompile Include="VSMonitorApp.cpp" />
   </ItemGroup>

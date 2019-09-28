@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "framework.h"
 #include <string>
 #include "CVideoScreen.h"
 #include "AppException.h"
@@ -67,17 +67,10 @@ void CVideoScreen::CreateResources(HWND hWnd)
 	m_Zoom = 1;
 	m_Pan = D2D1::Point2F(m_VideoFrameWithBorderSize.width / 2.0f, m_VideoFrameWithBorderSize.height / 2.0f);
 	m_ScreenSize = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
-
-	// Create Map Object
-	m_Map = std::make_unique<CMap>(m_pRT, hWnd);
-
 }
 
 void CVideoScreen::ReleaseResources()
 {
-	// Delete Map Object
-	m_Map.reset();
-
 	// DWrite & Direct2D Resources
 	SafeRelease(&m_pTextFormatDebug);
 	SafeRelease(&m_pTextFormatNotifications);
@@ -129,7 +122,6 @@ void CVideoScreen::Draw(HDC hdc, HWND hWnd)
 
 	// Draw Map - Fullscreen
 	m_pRT->SetTransform(D2D1::Matrix3x2F::Scale((float)m_ScreenSize.width/ 1920, (float)m_ScreenSize.height / 1080) ); // rescale to full screen
-	m_Map->Draw();
 
 
 #if 0 
@@ -358,9 +350,4 @@ D2D1_SIZE_F CVideoScreen::GetVideoToScreenRatio()
 float CVideoScreen::GetVideoAspectRatio()
 {
 	return (float)m_VideoFrameWithBorderSize.width / m_VideoFrameWithBorderSize.height;
-}
-
-std::unique_ptr<CMap>& CVideoScreen::GetMap()
-{
-	return m_Map;
 }

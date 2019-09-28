@@ -16,6 +16,9 @@
     <Filter Include="H264Decoder">
       <UniqueIdentifier>{b0f9998b-aea6-46ed-8eb5-d7359113e5fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{744685ed-138c-4b2b-8973-fadd3ea5af0a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -33,6 +36,15 @@
     <ClInclude Include="H264Decoder\H264Decoder.h">
       <Filter>H264Decoder</Filter>
     </ClInclude>
+    <ClInclude Include="AppException.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CTimer.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CVideoScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VSMonitorApp.cpp">
@@ -40,6 +52,12 @@
     </ClCompile>
     <ClCompile Include="H264Decoder\H264Decoder.cpp">
       <Filter>H264Decoder</Filter>
+    </ClCompile>
+    <ClCompile Include="CTimer.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="CVideoScreen.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
