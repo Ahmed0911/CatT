@@ -16,15 +16,18 @@
 #include <unistd.h>
 #endif
 
-TCPServer::TCPServer(std::string interfaceIP, uint16_t localPort) : m_TxCounter(0), m_ListenSocket(-1)
+TCPServer::TCPServer(std::string interfaceIP, uint16_t localPort) : m_TxCounter{ 0 }, m_ListenSocket{ -1 }, m_Running{true}
 {
 #ifdef _WIN64
 	WSADATA wsaData;
-	WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	{
+		std::cout << "WSAStartup error" << std::endl;
+		return;
+	}
 #endif
 
 	// Start thread
-	m_Running = true;
 	m_WorkerThread = std::thread(&TCPServer::WorkerThread, this, interfaceIP, localPort);
 }
 
@@ -40,12 +43,6 @@ TCPServer::~TCPServer()
 		close(m_ListenSocket);
 		m_ListenSocket = -1;
 	}
-}
-
-void TCPServer::SetData(SScenicData data)
-{
-	std::lock_guard<std::mutex> lock(m_DataStructDataMutex);
-	memcpy(&m_Data, &data, sizeof(SScenicData));
 }
 
 void TCPServer::WorkerThread(std::string interfaceIP, uint16_t localPort)
@@ -93,13 +90,10 @@ void TCPServer::WorkerThread(std::string interfaceIP, uint16_t localPort)
 			std::cout << "Connected from: " << inet_ntoa(clientaddr.sin_addr) << std::endl;
 			do
 			{
-				SScenicData data;
-				{
-					std::lock_guard<std::mutex> lock(m_DataStructDataMutex);
-					memcpy(&data, &m_Data, sizeof(SScenicData));
-				}
-				int snt = send(clientSock, (char*)&data, sizeof(data), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
-				if (snt <= 0) break; // error
+				// TODO: ADD CALLBACK
+
+				//int snt = send(clientSock, (char*)&data, sizeof(data), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+				//if (snt <= 0) break; // error
 				m_TxCounter++;
 
 				std::this_thread::sleep_for(std::chrono::milliseconds(100)); // TBD, DATA RATE
