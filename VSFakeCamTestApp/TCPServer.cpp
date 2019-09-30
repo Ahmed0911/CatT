@@ -81,8 +81,8 @@ void TCPServer::WorkerThread(std::string interfaceIP, uint16_t localPort)
 				// Do all communication in parent object
 				if (clientCallback)
 				{
-					bool error = clientCallback(clientSock);
-					if (error) break;
+					bool ok = clientCallback(clientSock);
+					if (!ok) break;
 				}
 				else
 				{
