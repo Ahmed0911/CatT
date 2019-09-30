@@ -5,15 +5,7 @@
 #include <thread>
 #include <mutex>
 
-struct SScenicData
-{
-	uint64_t Timestamp; // date + time
-	uint64_t GPSLastDataTimestamp;
-	double GPSLongitude;
-	double GPSLatitude;
-	double VehicleVelocityKPH;
-	uint32_t CSQ;
-};
+#include "CommonStructs.h"
 
 class TCPClient
 {
@@ -23,7 +15,7 @@ public:
 
 	enum class eConnectionState { Closed, Good, Bad, Fail };
 
-	SScenicData GetData();
+	SClientData GetData();
 	bool IsConnected();
 	eConnectionState GetConnectionState();
 
@@ -35,11 +27,11 @@ private:
 	SOCKET m_ClientSocket;
 	std::thread m_WorkerThread;
 	bool m_Running;
-	std::mutex m_DataStructDataMutex;
+	mutable std::mutex m_DataStructDataMutex;
 	uint64_t m_LastReceiveDataTimestampUS;
 
-	// Data
-	SScenicData m_Data;
+	// Data (REMOVE ME)
+	SClientData m_Data;
 	
 	// Methods
 	void WorkerThread(std::string serverName, uint16_t serverPort);

@@ -2,7 +2,7 @@
 #include <chrono>
 #include "AppException.h"
 
-TCPClient::TCPClient(std::string serverName, uint16_t serverPort) : m_ReconnectTryCounter(0), m_RcvCounter(0), m_ClientSocket(INVALID_SOCKET), m_Data(SScenicData())
+TCPClient::TCPClient(std::string serverName, uint16_t serverPort) : m_ReconnectTryCounter{ 0 }, m_RcvCounter{ 0 }, m_ClientSocket{ INVALID_SOCKET }, m_Data(SClientData{})
 {
 	// Init winsock WINDOWS ONLY
 	WSADATA wsaData;
@@ -39,7 +39,7 @@ void TCPClient::WorkerThread(std::string serverName, uint16_t serverPort)
 		m_ClientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		APPWIN32_CK(m_ClientSocket != INVALID_SOCKET, "socket failed");
 
-		/* Set KEEPALIVE, used to close dead connections from ScenicApp side, can be removed if ScenicApp actually sends some data */
+		/* Set KEEPALIVE, used to close dead connections from Client side, can be removed if Client actually sends some data */
 		BOOL optval = TRUE;
 		APPWIN32_CK(setsockopt(m_ClientSocket, SOL_SOCKET, SO_KEEPALIVE, (char*)&optval, sizeof(optval)) != SOCKET_ERROR, "SO_KEEPALIVE failed");
 
@@ -60,13 +60,13 @@ void TCPClient::WorkerThread(std::string serverName, uint16_t serverPort)
 			// connected, transfer data
 			do
 			{
-				SScenicData data;
-				int r = recv(m_ClientSocket, (char*)&data, sizeof(SScenicData), MSG_WAITALL);
+				SClientData data;
+				int r = recv(m_ClientSocket, (char*)&data, sizeof(data), MSG_WAITALL);
 				if (r <= 0 ) break; // connection closed (r == 0) or lost (r == SOCKET_ERROR)
 				else
 				{
 					// transfer data
-					std::lock_guard<std::mutex> lock(m_DataStructDataMutex);
+					std::scoped_lock<std::mutex> lock(m_DataStructDataMutex);
 					m_Data = data;
 					
 					m_LastReceiveDataTimestampUS = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -83,10 +83,10 @@ void TCPClient::WorkerThread(std::string serverName, uint16_t serverPort)
 	}
 }
 
-SScenicData TCPClient::GetData()
+SClientData TCPClient::GetData()
 {
-	SScenicData data;
-	std::lock_guard<std::mutex> lock(m_DataStructDataMutex);
+	SClientData data;
+	std::scoped_lock<std::mutex> lock(m_DataStructDataMutex);
 	data = m_Data;
 
 	return data;
