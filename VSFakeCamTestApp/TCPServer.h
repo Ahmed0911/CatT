@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <thread>
+#include <functional>
 
 class TCPServer
 {
@@ -10,6 +11,9 @@ public:
 
 	// Statistics
 	uint32_t m_TxCounter;
+
+	// Data Callback
+	std::function<bool(int32_t socket)> clientCallback;
 
 private:
 	int m_ListenSocket;

@@ -34,5 +34,7 @@ private:
 	SClientData m_ClientData;
 
 	mutable std::mutex m_ClientDataMutex;
+
+	bool CommCallback(int32_t socket);
 };
 

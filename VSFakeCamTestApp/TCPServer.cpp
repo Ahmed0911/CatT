@@ -91,7 +91,11 @@ void TCPServer::WorkerThread(std::string interfaceIP, uint16_t localPort)
 			do
 			{
 				// TODO: ADD CALLBACK
-
+				if (clientCallback)
+				{
+					bool error = clientCallback(clientSock);
+				}
+				
 				//int snt = send(clientSock, (char*)&data, sizeof(data), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
 				//if (snt <= 0) break; // error
 				m_TxCounter++;
