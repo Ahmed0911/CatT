@@ -2,8 +2,8 @@
 
 CommunicationMgr::CommunicationMgr(std::string interfaceIP, uint16_t localPort) : m_Server{ interfaceIP, localPort }, m_FifoImage{100}, m_ClientData{}
 {
-	m_Server.clientCallback = std::bind(&CommunicationMgr::CommCallback, this, std::placeholders::_1);
-	//m_Server.clientCallback = [&](int32_t socket)->bool {  return this->CommCallback(socket); };
+	//m_Server.clientCallback = std::bind(&CommunicationMgr::CommCallback, this, std::placeholders::_1);
+	m_Server.clientCallback = [&](int32_t socket)->bool {  return this->CommCallback(socket); };
 }
 
 bool CommunicationMgr::PushImage(SImage image)
