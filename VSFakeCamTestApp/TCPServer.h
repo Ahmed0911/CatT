@@ -3,14 +3,24 @@
 #include <thread>
 #include <functional>
 
+#ifdef _WIN64
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <ws2tcpip.h>
+#define close closesocket
+#define MSG_NOSIGNAL 0
+#else
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
+#endif
+
+
 class TCPServer
 {
 public:
 	TCPServer(std::string interfaceIP, uint16_t localPort);
 	virtual ~TCPServer();
-
-	// Statistics
-	uint32_t m_TxCounter;
 
 	// Data Callback
 	std::function<bool(int32_t socket)> clientCallback;

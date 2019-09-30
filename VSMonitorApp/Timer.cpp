@@ -1,24 +1,24 @@
 #include "framework.h"
-#include "CTimer.h"
+#include "Timer.h"
 
-CTimer::CTimer() : m_ElapsedTimeS(0), m_StartingTime(LARGE_INTEGER())
+Timer::Timer() : m_ElapsedTimeS(0), m_StartingTime(LARGE_INTEGER())
 {
 	// get frequency
 	QueryPerformanceFrequency(&m_Frequency);
 }
 
 
-CTimer::~CTimer()
+Timer::~Timer()
 {
 }
 
-void CTimer::Start()
+void Timer::Start()
 {
 	// get start time
 	QueryPerformanceCounter(&m_StartingTime);
 }
 
-double CTimer::Stop()
+double Timer::Stop()
 {
 	LARGE_INTEGER endingTime, elapsedMicroseconds;
 
@@ -36,7 +36,7 @@ double CTimer::Stop()
 	return m_ElapsedTimeS;
 }
 
-double CTimer::GetElapsedTime()
+double Timer::GetElapsedTime()
 {
 	return m_ElapsedTimeS;
 }

@@ -1,12 +1,12 @@
 #pragma once
-#include "CTimer.h"
+#include "Timer.h"
 #include <string>
 
 #define BORDER_SIZE 20
 
 enum EMouseEvents { OnMouseDown, OnMouseUp, OnMouseMove, OnMouseRightDown, OnMouseMiddleDown, OnMouseWheel };
 
-class CVideoScreen
+class VideoScreen
 {
 public:
 	void Init(HWND hWnd);
@@ -30,7 +30,7 @@ private:
 
 private:
 	// Performance measurement stuff
-	CTimer m_screenTimerTmr;
+	Timer m_screenTimerTmr;
 	double m_screenTimeMS;
 	double m_screenTimeMSAvg;
 
@@ -50,7 +50,7 @@ private:
 	std::wstring m_NotificationText;
 	D2D1_COLOR_F m_NotificationColor;
 	double m_NotificationTimeoutSec;
-	CTimer m_NotificationClock; // timer for displaying notification message
+	Timer m_NotificationClock; // timer for displaying notification message
 
 	// Mouse handling
 	bool m_MouseIsDown;
@@ -68,7 +68,7 @@ private:
 	ID2D1SolidColorBrush* m_pLabelBrush = NULL;
 
 public:
-	CVideoScreen();
-	virtual ~CVideoScreen();
+	VideoScreen();
+	virtual ~VideoScreen();
 };
 

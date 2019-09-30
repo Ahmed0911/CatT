@@ -12,8 +12,7 @@ public:
 
 	T Pop()
 	{
-		std::scoped_lock<std::mutex> lk{ m_Mutex };		
-		//std::unique_lock<std::mutex> lk{ m_Mutex };
+		std::unique_lock<std::mutex> lk{ m_Mutex };
 		while (m_Queue.empty()) // wait for new data to arrive. NOTE: this might not work if notify is called before wait!
 		{
 			m_NewDataCondition.wait(lk);
@@ -28,9 +27,9 @@ public:
 	{
 		std::unique_lock<std::mutex> lk{ m_Mutex };
 		if (m_Queue.size() >= m_MaxSize) return false;
-
 		m_Queue.push(element);
 		lk.unlock();
+
 		m_NewDataCondition.notify_one();
 
 		return true;

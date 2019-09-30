@@ -3,7 +3,7 @@
 
 #include "framework.h"
 #include "VSMonitorApp.h"
-#include "CVideoScreen.h"
+#include "VideoScreen.h"
 #include "AppException.h"
 #include <fstream>
 
@@ -15,7 +15,7 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 // Global Objects
-std::unique_ptr<CVideoScreen> g_VideoScreen;
+std::unique_ptr<VideoScreen> g_VideoScreen;
 HWND g_hWnd;
 
 // Forward declarations of functions included in this code module:
@@ -154,7 +154,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    APPWIN32_CK(g_hWnd != NULL, "Main CreateWindow Failed");
 
    // Create Main Objects: Video Screen
-   g_VideoScreen = std::make_unique<CVideoScreen>();
+   g_VideoScreen = std::make_unique<VideoScreen>();
    g_VideoScreen->Init(g_hWnd);
 
    ShowWindow(g_hWnd, nCmdShow);

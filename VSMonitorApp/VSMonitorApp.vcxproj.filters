@@ -39,10 +39,13 @@
     <ClInclude Include="AppException.h">
       <Filter>Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="CTimer.h">
+    <ClInclude Include="Timer.h">
       <Filter>Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="CVideoScreen.h">
+    <ClInclude Include="TCPClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VideoScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,10 +56,13 @@
     <ClCompile Include="H264Decoder\H264Decoder.cpp">
       <Filter>H264Decoder</Filter>
     </ClCompile>
-    <ClCompile Include="CTimer.cpp">
+    <ClCompile Include="Timer.cpp">
       <Filter>Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="CVideoScreen.cpp">
+    <ClCompile Include="TCPClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

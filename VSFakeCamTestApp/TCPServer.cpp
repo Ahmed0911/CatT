@@ -4,19 +4,7 @@
 #include <chrono>
 #include <thread>
 
-#ifdef _WIN64
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <ws2tcpip.h>
-#define close closesocket
-#define MSG_NOSIGNAL 0
-#else
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
-#endif
-
-TCPServer::TCPServer(std::string interfaceIP, uint16_t localPort) : m_TxCounter{ 0 }, m_ListenSocket{ -1 }, m_Running{true}
+TCPServer::TCPServer(std::string interfaceIP, uint16_t localPort) : m_ListenSocket{ -1 }, m_Running{true}
 {
 #ifdef _WIN64
 	WSADATA wsaData;
@@ -90,17 +78,17 @@ void TCPServer::WorkerThread(std::string interfaceIP, uint16_t localPort)
 			std::cout << "Connected from: " << inet_ntoa(clientaddr.sin_addr) << std::endl;
 			do
 			{
-				// TODO: ADD CALLBACK
+				// Do all communication in parent object
 				if (clientCallback)
 				{
 					bool error = clientCallback(clientSock);
+					if (error) break;
 				}
-				
-				//int snt = send(clientSock, (char*)&data, sizeof(data), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
-				//if (snt <= 0) break; // error
-				m_TxCounter++;
-
-				std::this_thread::sleep_for(std::chrono::milliseconds(100)); // TBD, DATA RATE
+				else
+				{
+					std::cout << "No callback, ERROR" << std::endl << std::endl;
+					break; // no sense to do anything without callback
+				}								
 			} while (1);
 		}
 

@@ -41,6 +41,16 @@ void CommunicationMgr::PullCmd()
 // Return false if send/recv fails, tcpclient will be terminated
 bool CommunicationMgr::CommCallback(int32_t socket)
 {
+	// Send Data	
+	std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
+	SClientData clientData = m_ClientData;	
+	lk.unlock();
+
+	int snt = send(socket, (char*)& clientData, sizeof(clientData), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+	if (snt > 0) return false; // error, disconnect client
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Set Data Rate
+
 	return true;
 }
 

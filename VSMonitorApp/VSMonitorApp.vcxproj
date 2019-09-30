@@ -98,18 +98,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AppException.h" />
-    <ClInclude Include="CTimer.h" />
-    <ClInclude Include="CVideoScreen.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="H264Decoder\H264Decoder.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TCPClient.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="VideoScreen.h" />
     <ClInclude Include="VSMonitorApp.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CTimer.cpp" />
-    <ClCompile Include="CVideoScreen.cpp" />
     <ClCompile Include="H264Decoder\H264Decoder.cpp" />
+    <ClCompile Include="TCPClient.cpp" />
+    <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="VideoScreen.cpp" />
     <ClCompile Include="VSMonitorApp.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,14 +1,14 @@
 #include "framework.h"
 #include <string>
-#include "CVideoScreen.h"
+#include "VideoScreen.h"
 #include "AppException.h"
 #include <assert.h>
 
-CVideoScreen::CVideoScreen() : m_screenTimeMS(0), m_screenTimeMSAvg(0)
+VideoScreen::VideoScreen() : m_screenTimeMS(0), m_screenTimeMSAvg(0)
 {
 }
 
-CVideoScreen::~CVideoScreen()
+VideoScreen::~VideoScreen()
 {
 	// release resources (other than factories->used when target is lost)
 	ReleaseResources();
@@ -18,7 +18,7 @@ CVideoScreen::~CVideoScreen()
 	SafeRelease(&m_pD2DFactory);
 }
 
-void CVideoScreen::Init(HWND hWnd)
+void VideoScreen::Init(HWND hWnd)
 {
 	// create D2D Factory
 	APPHRESULT_CK(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pD2DFactory), "D2D1CreateFactory failed");
@@ -30,7 +30,7 @@ void CVideoScreen::Init(HWND hWnd)
 	CreateResources(hWnd);
 }
 
-void CVideoScreen::CreateResources(HWND hWnd)
+void VideoScreen::CreateResources(HWND hWnd)
 {
 	// Obtain the size of the drawing area.
 	RECT rc;
@@ -69,7 +69,7 @@ void CVideoScreen::CreateResources(HWND hWnd)
 	m_ScreenSize = D2D1::SizeU(rc.right - rc.left, rc.bottom - rc.top);
 }
 
-void CVideoScreen::ReleaseResources()
+void VideoScreen::ReleaseResources()
 {
 	// DWrite & Direct2D Resources
 	SafeRelease(&m_pTextFormatDebug);
@@ -79,7 +79,7 @@ void CVideoScreen::ReleaseResources()
 	SafeRelease(&m_pRT);
 }
 
-void CVideoScreen::ResizeWindow(HWND hWnd, int x, int y)
+void VideoScreen::ResizeWindow(HWND hWnd, int x, int y)
 {
 	RECT rc;
 	GetClientRect(hWnd, &rc);
@@ -90,7 +90,7 @@ void CVideoScreen::ResizeWindow(HWND hWnd, int x, int y)
 }
 
 // returns true if size changed!
-bool CVideoScreen::UpdateVideoFrame(BYTE* imageBuffer, int sizeX, int sizeY)
+bool VideoScreen::UpdateVideoFrame(BYTE* imageBuffer, int sizeX, int sizeY)
 {
 	bool sizeChanged = false;
 
@@ -113,7 +113,7 @@ bool CVideoScreen::UpdateVideoFrame(BYTE* imageBuffer, int sizeX, int sizeY)
 	return sizeChanged;
 }
 
-void CVideoScreen::Draw(HDC hdc, HWND hWnd)
+void VideoScreen::Draw(HDC hdc, HWND hWnd)
 {
 	m_screenTimerTmr.Start(); // start measurement
 
@@ -197,12 +197,12 @@ void CVideoScreen::Draw(HDC hdc, HWND hWnd)
 	m_screenTimeMSAvg = m_screenTimeMS * 0.05 + m_screenTimeMSAvg * 0.95;
 }
 
-double CVideoScreen::GetScreenTimeMSec()
+double VideoScreen::GetScreenTimeMSec()
 {
 	return m_screenTimeMSAvg;
 }
 
-void CVideoScreen::SetNotification(std::wstring text, D2D1_COLOR_F color, double timeout)
+void VideoScreen::SetNotification(std::wstring text, D2D1_COLOR_F color, double timeout)
 {
 	m_NotificationText = text;
 	m_NotificationColor = color;
@@ -210,7 +210,7 @@ void CVideoScreen::SetNotification(std::wstring text, D2D1_COLOR_F color, double
 	m_NotificationClock.Start();
 }
 
-void CVideoScreen::HandleMouse(EMouseEvents mEvent, int32_t x, int32_t y, int32_t wheelDelta)
+void VideoScreen::HandleMouse(EMouseEvents mEvent, int32_t x, int32_t y, int32_t wheelDelta)
 {
 	if (mEvent == OnMouseDown)
 	{
@@ -274,7 +274,7 @@ void CVideoScreen::HandleMouse(EMouseEvents mEvent, int32_t x, int32_t y, int32_
 /////////////////////////////////////////////////////////////
 // Screen translation functions
 /////////////////////////////////////////////////////////////
-D2D1_POINT_2F CVideoScreen::VideoToScreenPixel(D2D1_POINT_2F videoPixel)
+D2D1_POINT_2F VideoScreen::VideoToScreenPixel(D2D1_POINT_2F videoPixel)
 {
 	D2D1_SIZE_F viewSize;
 	viewSize.width = m_VideoFrameWithBorderSize.width / m_Zoom; // m_Zoom must be => 1
@@ -303,7 +303,7 @@ D2D1_POINT_2F CVideoScreen::VideoToScreenPixel(D2D1_POINT_2F videoPixel)
 	return screenPoint;
 }
 
-D2D1_POINT_2F CVideoScreen::ScreenToVideoPixel(D2D1_POINT_2F screenPixel)
+D2D1_POINT_2F VideoScreen::ScreenToVideoPixel(D2D1_POINT_2F screenPixel)
 {
 	D2D1_SIZE_F viewSize;
 	viewSize.width = m_VideoFrameWithBorderSize.width / m_Zoom; // m_Zoom must be => 1
@@ -338,7 +338,7 @@ D2D1_POINT_2F CVideoScreen::ScreenToVideoPixel(D2D1_POINT_2F screenPixel)
 	return videoPixel;
 }
 
-D2D1_SIZE_F CVideoScreen::GetVideoToScreenRatio()
+D2D1_SIZE_F VideoScreen::GetVideoToScreenRatio()
 {
 	D2D1_SIZE_F ratio;
 	ratio.width = (float)(m_ScreenSize.width * m_Zoom / m_VideoFrameWithBorderSize.width);
@@ -347,7 +347,7 @@ D2D1_SIZE_F CVideoScreen::GetVideoToScreenRatio()
 	return ratio;
 }
 
-float CVideoScreen::GetVideoAspectRatio()
+float VideoScreen::GetVideoAspectRatio()
 {
 	return (float)m_VideoFrameWithBorderSize.width / m_VideoFrameWithBorderSize.height;
 }

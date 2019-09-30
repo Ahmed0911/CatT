@@ -1,5 +1,5 @@
 #pragma once
-class CTimer
+class Timer
 {
 private:
 	LARGE_INTEGER m_Frequency;
@@ -12,7 +12,7 @@ public:
 	double GetElapsedTime();
 
 public:
-	CTimer();
-	~CTimer();
+	Timer();
+	~Timer();
 };
 
