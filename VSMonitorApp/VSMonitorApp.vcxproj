@@ -101,6 +101,8 @@
   <ItemGroup>
     <ClInclude Include="AppException.h" />
     <ClInclude Include="CommonStructs.h" />
+    <ClInclude Include="CommunicationMgr.h" />
+    <ClInclude Include="Fifo.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="H264Decoder\H264Decoder.h" />
     <ClInclude Include="Resource.h" />
@@ -111,6 +113,7 @@
     <ClInclude Include="VSMonitorApp.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CommunicationMgr.cpp" />
     <ClCompile Include="H264Decoder\H264Decoder.cpp" />
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="Timer.cpp" />

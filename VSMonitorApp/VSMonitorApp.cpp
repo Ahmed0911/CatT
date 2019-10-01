@@ -5,12 +5,13 @@
 #include "VSMonitorApp.h"
 #include "VideoScreen.h"
 #include "AppException.h"
-#include "TCPClient.h"
+#include "CommunicationMgr.h"
 #include "CommonStructs.h"
 #include <fstream>
 
 #define MAX_LOADSTRING 100
 #define TCPPORT 80
+#define TCPINTERFACE "127.0.0.1"
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -53,7 +54,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VSMONITORAPP));
 
-		TCPClient client{ "localhost", TCPPORT };
+		CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
 
 		// render messaging loop
 		while (msg.message != WM_QUIT)
@@ -69,7 +70,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			else
 			{
 				// 1. Get new data/image
-				SClientData data = client.GetData();
+				//SClientData data = client.GetData();
 
 				// 2. Set new data
 
@@ -81,8 +82,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 				// XXX: DEBUG :XXX
 				std::wstring windowText;
-				windowText += L"   Time: ";
-				windowText += std::to_wstring(data.Timestamp);
+				//windowText += L"   Time: ";
+				//windowText += std::to_wstring(data.Timestamp);
 				windowText += L"   RenderTime: ";
 				windowText += std::to_wstring((int)g_VideoScreen->GetScreenTimeMSec());
 				SetWindowText(g_hWnd, windowText.c_str());

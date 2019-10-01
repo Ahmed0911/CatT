@@ -1,9 +1,9 @@
 #include "CommunicationMgr.h"
 
-CommunicationMgr::CommunicationMgr(std::string interfaceIP, uint16_t localPort) : m_Server{ interfaceIP, localPort }, m_FifoImage{100}, m_ClientData{}
+CommunicationMgr::CommunicationMgr(std::string serverName, uint16_t serverPort) : m_Client{ serverName, serverPort }, m_FifoImage{ 100 }, m_ClientData{}
 {
-	//m_Server.clientCallback = std::bind(&CommunicationMgr::CommCallback, this, std::placeholders::_1);
-	m_Server.clientCallback = [&](int32_t socket)->bool {  return this->CommCallback(socket); };
+	//m_Client.clientCallback = std::bind(&CommunicationMgr::CommCallback, this, std::placeholders::_1);
+	m_Client.serverCallback = [&](int32_t socket)->bool {  return this->CommCallback(socket); };
 }
 
 bool CommunicationMgr::PushImage(SImage image)
@@ -15,7 +15,7 @@ bool CommunicationMgr::PushImage(SImage image)
 	if (m_FifoImage.Push(image) == false)
 	{
 		// Release Pointer if queue failed
-		delete [] image.ImagePtr;
+		delete[] image.ImagePtr;
 	}
 
 	return true;
@@ -23,7 +23,7 @@ bool CommunicationMgr::PushImage(SImage image)
 
 void CommunicationMgr::SetData(SClientData data)
 {
-	std::scoped_lock<std::mutex> lk{m_ClientDataMutex};
+	std::scoped_lock<std::mutex> lk{ m_ClientDataMutex };
 	m_ClientData = data;
 }
 
@@ -47,14 +47,14 @@ bool CommunicationMgr::CommCallback(int32_t socket)
 	// Purge images
 	bool purged = false;
 	SImage image{};
-	while(!m_FifoImage.IsEmpty())
+	while (!m_FifoImage.IsEmpty())
 	{
 		uint64_t currentTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 		image = m_FifoImage.Pop();
 		int64_t dataAgeUS = (int64_t)(currentTime - image.Timestamp);
 
 		// check if image is old OR purged has been started but its not index frame
-		if ( (dataAgeUS > 1000000) || (purged && !image.IndexFrame) )
+		if ((dataAgeUS > 1000000) || (purged && !image.IndexFrame))
 		{
 			// drop image
 			delete[] image.ImagePtr;
@@ -67,16 +67,16 @@ bool CommunicationMgr::CommCallback(int32_t socket)
 	if (image.ImagePtr != nullptr)
 	{
 		// send image
-		if ( !SendHeader(socket, image, SDataHeader::_Type::Image) ) return false; // error, disconnect client
+		if (!SendHeader(socket, image, SDataHeader::_Type::Image)) return false; // error, disconnect client
 
-		int snt = send(socket, (char*)image.ImagePtr, (int)image.Size, MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+		int snt = send(socket, (char*)image.ImagePtr, (int)image.Size, 0); // MSG_NOSIGNAL - do not send SIGPIPE on close
 		if (snt != image.Size) return false; // error, disconnect client
 	}
-	
+	//int r = recv(m_ClientSocket, (char*)& data, sizeof(data), MSG_WAITALL);
 
 	// Send Data	
 /*	std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
-	SClientData clientData = m_ClientData;	
+	SClientData clientData = m_ClientData;
 	lk.unlock();
 
 	if ( !SendHeader(socket, image, SDataHeader::_Type::ClientData) ) return false; // error, disconnect client
@@ -93,8 +93,8 @@ bool CommunicationMgr::CommCallback(int32_t socket)
 bool CommunicationMgr::SendHeader(const int32_t& socket, SImage& image, SDataHeader::_Type type)
 {
 	SDataHeader header{ image.Size, type };
-	int snt = send(socket, (char*)&header, sizeof(header), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
-	
+	int snt = send(socket, (char*)& header, sizeof(header), 0); // MSG_NOSIGNAL - do not send SIGPIPE on close
+
 	return (snt == sizeof(header));
 }
 

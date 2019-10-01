@@ -2,7 +2,7 @@
 #include <chrono>
 #include "AppException.h"
 
-TCPClient::TCPClient(std::string serverName, uint16_t serverPort) : m_ReconnectTryCounter{ 0 }, m_RcvCounter{ 0 }, m_ClientSocket{ INVALID_SOCKET }, m_Data(SClientData{})
+TCPClient::TCPClient(std::string serverName, uint16_t serverPort) : m_ReconnectTryCounter{ 0 }, m_ClientSocket{ INVALID_SOCKET }
 {
 	// Init winsock WINDOWS ONLY
 	WSADATA wsaData;
@@ -60,17 +60,15 @@ void TCPClient::WorkerThread(std::string serverName, uint16_t serverPort)
 			// connected, transfer data
 			do
 			{
-				SClientData data;
-				int r = recv(m_ClientSocket, (char*)&data, sizeof(data), MSG_WAITALL);
-				if (r <= 0 ) break; // connection closed (r == 0) or lost (r == SOCKET_ERROR)
+				// Do all communication in parent object
+				if (serverCallback)
+				{
+					bool ok = serverCallback(m_ClientSocket);
+					if (!ok) break;
+				}
 				else
 				{
-					// transfer data
-					std::scoped_lock<std::mutex> lock(m_DataStructDataMutex);
-					m_Data = data;
-					
-					m_LastReceiveDataTimestampUS = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-					m_RcvCounter++;
+					break; // no sense to do anything without callback
 				}
 			} while (1);
 		}
@@ -81,15 +79,6 @@ void TCPClient::WorkerThread(std::string serverName, uint16_t serverPort)
 		m_ReconnectTryCounter++;
 		Sleep(5000);
 	}
-}
-
-SClientData TCPClient::GetData()
-{
-	SClientData data;
-	std::scoped_lock<std::mutex> lock(m_DataStructDataMutex);
-	data = m_Data;
-
-	return data;
 }
 
 bool TCPClient::IsConnected()

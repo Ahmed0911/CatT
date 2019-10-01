@@ -51,6 +51,12 @@
     <ClInclude Include="CommonStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommunicationMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Fifo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VSMonitorApp.cpp">
@@ -66,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VideoScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommunicationMgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
