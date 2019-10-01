@@ -35,6 +35,12 @@ public:
 		return true;
 	}
 
+	bool IsEmpty()
+	{
+		std::scoped_lock<std::mutex> lk{ m_Mutex };
+		return m_Queue.empty();
+	}
+
 private:
 	uint32_t m_MaxSize;
 	std::queue<T> m_Queue;

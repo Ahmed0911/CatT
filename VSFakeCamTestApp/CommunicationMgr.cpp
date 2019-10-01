@@ -8,6 +8,9 @@ CommunicationMgr::CommunicationMgr(std::string interfaceIP, uint16_t localPort) 
 
 bool CommunicationMgr::PushImage(SImage image)
 {
+	// Add timestamp
+	image.Timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+
 	// put to queue
 	if (m_FifoImage.Push(image) == false)
 	{
@@ -41,17 +44,58 @@ void CommunicationMgr::PullCmd()
 // Return false if send/recv fails, tcpclient will be terminated
 bool CommunicationMgr::CommCallback(int32_t socket)
 {
+	// Purge images
+	bool purged = false;
+	SImage image{};
+	while(!m_FifoImage.IsEmpty())
+	{
+		uint64_t currentTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+		image = m_FifoImage.Pop();
+		int64_t dataAgeUS = (int64_t)(currentTime - image.Timestamp);
+
+		// check if image is old OR purged has been started but its not index frame
+		if ( (dataAgeUS > 1000000) || (purged && !image.IndexFrame) )
+		{
+			// drop image
+			delete[] image.ImagePtr;
+			purged = true;
+		}
+		else break; // purge completed
+	}
+
+	// Send Image
+	if (image.ImagePtr != nullptr)
+	{
+		// send image
+		if ( !SendHeader(socket, image, SDataHeader::_Type::Image) ) return false; // error, disconnect client
+
+		int snt = send(socket, (char*)& image.ImagePtr, (int)image.Size, MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+		if (snt != image.Size) return false; // error, disconnect client
+	}
+	
+
 	// Send Data	
-	std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
+/*	std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
 	SClientData clientData = m_ClientData;	
 	lk.unlock();
 
-	int snt = send(socket, (char*)& clientData, sizeof(clientData), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
-	if (snt < 0) return false; // error, disconnect client
+	if ( !SendHeader(socket, image, SDataHeader::_Type::ClientData) ) return false; // error, disconnect client
 
-	std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Set Data Rate
+	int snt = send(socket, (char*)& clientData, sizeof(clientData), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+	if (snt != sizeof(clientData)) return false; // error, disconnect client
+*/
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	return true;
+}
+
+bool CommunicationMgr::SendHeader(const int32_t& socket, SImage& image, SDataHeader::_Type type)
+{
+	SDataHeader header{ image.Size, type };
+	int snt = send(socket, (char*)& header, sizeof(header), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+	
+	return (snt == sizeof(header));
 }
 
 CommunicationMgr::~CommunicationMgr()

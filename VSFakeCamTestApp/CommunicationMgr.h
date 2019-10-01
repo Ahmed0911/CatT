@@ -36,5 +36,6 @@ private:
 	mutable std::mutex m_ClientDataMutex;
 
 	bool CommCallback(int32_t socket);
+	bool SendHeader(const int32_t& socket, SImage& image, SDataHeader::_Type type);
 };
 

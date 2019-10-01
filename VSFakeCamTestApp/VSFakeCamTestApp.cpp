@@ -28,7 +28,7 @@ int main()
 
 		// Send Next Frame
 		// Generate Dummy data
-		SImage image{ new uint8_t[DUMMYSIZE], DUMMYSIZE, true};
+		SImage image{ new uint8_t[DUMMYSIZE], DUMMYSIZE, true, 0};
 		for (uint32_t i = 0; i != image.Size; i++) image.ImagePtr[i] = static_cast<uint8_t>(i);
 		commMgr.PushImage(image);
 
