@@ -41,6 +41,12 @@ public:
 		return m_Queue.empty();
 	}
 
+	uint64_t GetCount()
+	{
+		std::scoped_lock<std::mutex> lk{ m_Mutex };
+		return m_Queue.size();
+	}
+
 private:
 	uint32_t m_MaxSize;
 	std::queue<T> m_Queue;

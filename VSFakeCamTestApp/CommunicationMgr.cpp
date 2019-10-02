@@ -63,13 +63,19 @@ bool CommunicationMgr::CommCallback(int32_t socket)
 		else break; // purge completed
 	}
 
-	// Send Image
+	// Send Image (TBD: Send image header???)
 	if (image.ImagePtr != nullptr)
 	{
 		// send image
-		if ( !SendHeader(socket, image, SDataHeader::_Type::Image) ) return false; // error, disconnect client
+		if (!SendHeader(socket, image.Size, SDataHeader::_Type::Image))
+		{
+			delete[] image.ImagePtr; // delete image
+			return false; // error, disconnect client
+		}
 
-		int snt = send(socket, (char*)image.ImagePtr, (int)image.Size, MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+		int snt = send(socket, (char*)image.ImagePtr, (int)image.Size, MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on clos
+		delete[] image.ImagePtr; // delete image
+
 		if (snt != image.Size) return false; // error, disconnect client
 	}
 	
@@ -78,21 +84,20 @@ bool CommunicationMgr::CommCallback(int32_t socket)
 /*	std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
 	SClientData clientData = m_ClientData;	
 	lk.unlock();
+	if ( !SendHeader(socket, sizeof(clientData), SDataHeader::_Type::ClientData) ) return false; // error, disconnect client
 
-	if ( !SendHeader(socket, image, SDataHeader::_Type::ClientData) ) return false; // error, disconnect client
-
-	int snt = send(socket, (char*)& clientData, sizeof(clientData), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
+	int snt = send(socket, (char*)&clientData, sizeof(clientData), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
 	if (snt != sizeof(clientData)) return false; // error, disconnect client
-*/
+	*/
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	return true;
 }
 
-bool CommunicationMgr::SendHeader(const int32_t& socket, SImage& image, SDataHeader::_Type type)
+bool CommunicationMgr::SendHeader(const int32_t& socket, uint64_t size, SDataHeader::_Type type)
 {
-	SDataHeader header{ image.Size, type };
+	SDataHeader header{ size, type };
 	int snt = send(socket, (char*)&header, sizeof(header), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
 	
 	return (snt == sizeof(header));

@@ -6,25 +6,19 @@ CommunicationMgr::CommunicationMgr(std::string serverName, uint16_t serverPort) 
 	m_Client.serverCallback = [&](int32_t socket)->bool {  return this->CommCallback(socket); };
 }
 
-bool CommunicationMgr::PushImage(SImage image)
+bool CommunicationMgr::PullImage(SImage& image)
 {
-	// Add timestamp
-	image.Timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
-	// put to queue
-	if (m_FifoImage.Push(image) == false)
-	{
-		// Release Pointer if queue failed
-		delete[] image.ImagePtr;
-	}
+	if (m_FifoImage.IsEmpty()) return false;
+	
+	image = m_FifoImage.Pop();
 
 	return true;
 }
 
-void CommunicationMgr::SetData(SClientData data)
+void CommunicationMgr::GetData(SClientData& data)
 {
 	std::scoped_lock<std::mutex> lk{ m_ClientDataMutex };
-	m_ClientData = data;
+	data = m_ClientData;
 }
 
 
@@ -44,56 +38,52 @@ void CommunicationMgr::PullCmd()
 // Return false if send/recv fails, tcpclient will be terminated
 bool CommunicationMgr::CommCallback(int32_t socket)
 {
-	// Purge images
-	bool purged = false;
-	SImage image{};
-	while (!m_FifoImage.IsEmpty())
-	{
-		uint64_t currentTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-		image = m_FifoImage.Pop();
-		int64_t dataAgeUS = (int64_t)(currentTime - image.Timestamp);
+	// Read Header
+	SDataHeader header{};
+	int rd = recv(socket, (char*)&header, sizeof(header), MSG_WAITALL);
+	if (rd <= 0) return false; // connection closed (r == 0) or lost (r == SOCKET_ERROR)
 
-		// check if image is old OR purged has been started but its not index frame
-		if ((dataAgeUS > 1000000) || (purged && !image.IndexFrame))
-		{
-			// drop image
-			delete[] image.ImagePtr;
-			purged = true;
-		}
-		else break; // purge completed
+	switch (header.Type)
+	{
+	case SDataHeader::_Type::ClientData:
+	{
+		SClientData data{};
+		rd = recv(socket, (char*)& data, sizeof(data), MSG_WAITALL);
+		if (rd <= 0) return false; // connection closed (r == 0) or lost (r == SOCKET_ERROR)
+		
+		std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
+		m_ClientData = data;
+		lk.unlock();
+		break;
 	}
 
-	// Send Image
-	if (image.ImagePtr != nullptr)
+
+	case SDataHeader::_Type::Image:
 	{
-		// send image
-		if (!SendHeader(socket, image, SDataHeader::_Type::Image)) return false; // error, disconnect client
+		uint64_t imageSize = header.Size;
+		SImage image{ new uint8_t[imageSize], imageSize, false, 0 };
+		rd = recv(socket, (char*)image.ImagePtr, (int)imageSize, MSG_WAITALL);
+		if (rd <= 0) return false; // connection closed (r == 0) or lost (r == SOCKET_ERROR)
 
-		int snt = send(socket, (char*)image.ImagePtr, (int)image.Size, 0); // MSG_NOSIGNAL - do not send SIGPIPE on close
-		if (snt != image.Size) return false; // error, disconnect client
+		m_FifoImage.Push(image);
+		break;
 	}
-	//int r = recv(m_ClientSocket, (char*)& data, sizeof(data), MSG_WAITALL);
 
-	// Send Data	
-/*	std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
-	SClientData clientData = m_ClientData;
-	lk.unlock();
+	default:
+		// unsupported data, skip
+		break;
 
-	if ( !SendHeader(socket, image, SDataHeader::_Type::ClientData) ) return false; // error, disconnect client
-
-	int snt = send(socket, (char*)& clientData, sizeof(clientData), MSG_NOSIGNAL); // MSG_NOSIGNAL - do not send SIGPIPE on close
-	if (snt != sizeof(clientData)) return false; // error, disconnect client
-*/
+	}
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	return true;
 }
 
-bool CommunicationMgr::SendHeader(const int32_t& socket, SImage& image, SDataHeader::_Type type)
+bool CommunicationMgr::SendHeader(const int32_t& socket, uint64_t size, SDataHeader::_Type type)
 {
-	SDataHeader header{ image.Size, type };
-	int snt = send(socket, (char*)& header, sizeof(header), 0); // MSG_NOSIGNAL - do not send SIGPIPE on close
+	SDataHeader header{ size, type };
+	int snt = send(socket, (char*)& header, sizeof(header), 0); 
 
 	return (snt == sizeof(header));
 }

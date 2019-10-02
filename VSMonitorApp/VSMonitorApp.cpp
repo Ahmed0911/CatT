@@ -7,11 +7,15 @@
 #include "AppException.h"
 #include "CommunicationMgr.h"
 #include "CommonStructs.h"
+#include "H264Decoder\H264Decoder.h"
 #include <fstream>
+#include <iostream>
 
 #define MAX_LOADSTRING 100
 #define TCPPORT 80
 #define TCPINTERFACE "127.0.0.1"
+
+#define MAX_FRAME_SIZE (40*(1024*1024))
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
@@ -38,6 +42,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	MSG msg = { 0 };
 
+	// cout DEBUGGING to console
+	if (AllocConsole())
+	{
+		SetConsoleTitle(L"Debug Console");
+		static std::ofstream conout("CONOUT$", std::ios::out);		
+		std::cout.rdbuf(conout.rdbuf());
+	}
+
 	try
 	{
 
@@ -54,7 +66,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VSMONITORAPP));
 
+		// Communication object
 		CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
+
+		// H264 Decoder
+		H264Decoder decoder{};
+		std::unique_ptr<uint8_t[]> videoFrameBuffer{ new uint8_t[MAX_FRAME_SIZE] };
 
 		// render messaging loop
 		while (msg.message != WM_QUIT)
@@ -70,7 +87,23 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			else
 			{
 				// 1. Get new data/image
-				//SClientData data = client.GetData();
+				SClientData data;
+				commMgr.GetData(data);
+
+				SImage image{};
+				if (commMgr.PullImage(image))
+				{
+					// Decode
+					bool newImage = decoder.Decode(image.ImagePtr, image.Size);
+					delete[] image.ImagePtr;
+
+					// Update screen
+					if (newImage)
+					{
+						decoder.GetImage(videoFrameBuffer.get(), MAX_FRAME_SIZE);
+						bool videoFrameSizeChanged = g_VideoScreen->UpdateVideoFrame(videoFrameBuffer.get(), decoder.ImageWidth, decoder.ImageHeight);
+					}
+				}
 
 				// 2. Set new data
 
@@ -82,8 +115,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 				// XXX: DEBUG :XXX
 				std::wstring windowText;
-				//windowText += L"   Time: ";
-				//windowText += std::to_wstring(data.Timestamp);
+				windowText += L"   Time: ";
+				windowText += std::to_wstring(data.Timestamp);
+				windowText += L"   FIFO: ";
+				windowText += std::to_wstring(commMgr.m_FifoImage.GetCount());
 				windowText += L"   RenderTime: ";
 				windowText += std::to_wstring((int)g_VideoScreen->GetScreenTimeMSec());
 				SetWindowText(g_hWnd, windowText.c_str());

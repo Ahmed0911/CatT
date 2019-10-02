@@ -9,14 +9,12 @@ public:
 	CommunicationMgr(std::string interfaceIP, uint16_t localPort);
 	virtual ~CommunicationMgr();
 
-	// Push new image to queue and prepare for transfer
-	// Will be autoremoved from queue if queu is full due to slow transfer
-	// If will return false if CLient is not connected and data can't be sent
-	bool PushImage(SImage image);
+	// Get new image from FIFO
+	// return false in not available
+	bool PullImage(SImage& image);
 
-	// Set new values for cliend data structure (like time, gps location, etc...)
-	// Will be sent periodically, no queue
-	void SetData(SClientData data);
+	// Get new values from server data structure (like time, gps location, etc...)
+	void GetData(SClientData& data);
 
 	// Push new commands
 	// Commands are always sent (when client is connected)
@@ -28,14 +26,16 @@ public:
 	// TBD
 	void PullCmd();
 
+	Fifo<SImage> m_FifoImage;
+
 private:
 	TCPClient m_Client;
-	Fifo<SImage> m_FifoImage;
+	//Fifo<SImage> m_FifoImage;
 	SClientData m_ClientData;
 
 	mutable std::mutex m_ClientDataMutex;
 
 	bool CommCallback(int32_t socket);
-	bool SendHeader(const int32_t& socket, SImage& image, SDataHeader::_Type type);
+	bool SendHeader(const int32_t& socket, uint64_t size, SDataHeader::_Type type);
 };
 
