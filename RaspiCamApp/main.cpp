@@ -12,7 +12,7 @@
 
 // Server
 #define TCPINTERFACE "0.0.0.0"
-#define TCPPORT 80
+#define TCPPORT 5000
 
 // Camera
 #define DEV "/dev/video0"
@@ -151,7 +151,7 @@ int main()
 		}
 
 		// Frame retrieved, do something
-		printf("Buffer: %d, Image size: %d, Sequence: %d\n", bufferinfo.index, bufferinfo.bytesused, bufferinfo.sequence);
+		//printf("Buffer: %d, Image size: %d, Sequence: %d\n", bufferinfo.index, bufferinfo.bytesused, bufferinfo.sequence);
 
 		// Set some data
 		SClientData data;

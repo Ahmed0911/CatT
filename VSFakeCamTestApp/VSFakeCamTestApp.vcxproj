@@ -89,14 +89,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CommunicationMgr.cpp" />
-    <ClCompile Include="TCPServer.cpp" />
+    <ClCompile Include="tcpserver.cpp" />
     <ClCompile Include="VSFakeCamTestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonStructs.h" />
     <ClInclude Include="CommunicationMgr.h" />
     <ClInclude Include="Fifo.h" />
-    <ClInclude Include="TCPServer.h" />
+    <ClInclude Include="tcpserver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

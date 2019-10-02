@@ -6,7 +6,7 @@
 #include "CommunicationMgr.h"
 
 #define TCPINTERFACE "0.0.0.0"
-#define TCPPORT 80
+#define TCPPORT 5000
 
 #define DUMMYSIZE 10000
 

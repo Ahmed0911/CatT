@@ -58,6 +58,7 @@ bool CommunicationMgr::CommCallback(int32_t socket)
 		{
 			// drop image
 			delete[] image.ImagePtr;
+			image.ImagePtr = nullptr;
 			purged = true;
 		}
 		else break; // purge completed

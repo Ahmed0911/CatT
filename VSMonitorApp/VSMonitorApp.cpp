@@ -12,8 +12,8 @@
 #include <iostream>
 
 #define MAX_LOADSTRING 100
-#define TCPPORT 80
-#define TCPINTERFACE "127.0.0.1"
+#define TCPPORT 5000
+#define TCPINTERFACE "192.168.0.31"
 
 #define MAX_FRAME_SIZE (40*(1024*1024))
 
@@ -43,12 +43,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg = { 0 };
 
 	// cout DEBUGGING to console
-	if (AllocConsole())
+	/*if (AllocConsole())
 	{
 		SetConsoleTitle(L"Debug Console");
 		static std::ofstream conout("CONOUT$", std::ios::out);		
 		std::cout.rdbuf(conout.rdbuf());
-	}
+	}*/
 
 	try
 	{

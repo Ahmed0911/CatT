@@ -1,6 +1,6 @@
 #pragma once
 #include "CommonStructs.h"
-#include "TCPServer.h"
+#include "tcpserver.h"
 #include "Fifo.h"
 
 class CommunicationMgr
