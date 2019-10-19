@@ -18,7 +18,7 @@ PAGE="""\
 <title>Cat Trap v2</title>
 </head>
 <body>
-<center><img src="stream.mjpg" width="1296" height="972"></center>
+<center><img src="stream.mjpg" width="800" height="600"></center>
 <center><form action="/" method="post">
 <button style="width:500px;height:300px; type="submit" name="submit" value="Release">CATCH THEM ALL</button></form></center>
 </body>
@@ -108,11 +108,11 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
 
-with picamera.PiCamera(resolution='1296x972', framerate=24) as camera:
+with picamera.PiCamera(resolution='800x600', framerate=15) as camera:
     output = StreamingOutput()
     #Uncomment the next line to change your Pi's Camera rotation (in degrees)
-    camera.rotation = 180
-    camera.start_recording(output, format='mjpeg', bitrate=10000000)
+    camera.rotation = 0
+    camera.start_recording(output, format='mjpeg', bitrate=5000000)
     try:
         address = ('', 8000)
         server = StreamingServer(address, StreamingHandler)
