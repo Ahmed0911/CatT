@@ -2,7 +2,7 @@
 #include "Timer.h"
 #include <string>
 
-#define BORDER_SIZE 20
+#define BORDER_SIZE 0
 
 enum EMouseEvents { OnMouseDown, OnMouseUp, OnMouseMove, OnMouseRightDown, OnMouseMiddleDown, OnMouseWheel };
 
