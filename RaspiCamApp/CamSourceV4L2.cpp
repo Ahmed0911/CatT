@@ -43,11 +43,28 @@ CamSourceV4L2::CamSourceV4L2(std::string videoInput)
 	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	//format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 	format.fmt.pix.pixelformat = V4L2_PIX_FMT_H264;
-	format.fmt.pix.width = 640;
-	format.fmt.pix.height = 480;	 
+	format.fmt.pix.width = 1280;
+	format.fmt.pix.height = 960;
 	if(ioctl(_videoDevice, VIDIOC_S_FMT, &format) < 0)
 	{
 		std::cerr << "VIDIOC_S_FMT ERROR" << std::endl;
+		exit(1);
+	}
+
+	// Set Frame Rate
+	v4l2_streamparm streamparm{};
+	streamparm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if(ioctl(_videoDevice, VIDIOC_G_PARM, &streamparm) < 0)
+	{
+		std::cerr << "VIDIOC_G_PARM Failed" << std::endl;
+		exit(1);
+	}
+	streamparm.parm.capture.capturemode |= V4L2_CAP_TIMEPERFRAME;
+	streamparm.parm.capture.timeperframe.numerator=1;
+	streamparm.parm.capture.timeperframe.denominator=30;
+	if(ioctl(_videoDevice, VIDIOC_S_PARM, &streamparm) < 0)
+	{
+		std::cerr << "VIDIOC_S_PARM Failed" << std::endl;
 		exit(1);
 	}
 
