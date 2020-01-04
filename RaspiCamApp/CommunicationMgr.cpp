@@ -8,9 +8,6 @@ CommunicationMgr::CommunicationMgr(std::string interfaceIP, uint16_t localPort) 
 
 bool CommunicationMgr::PushImage(SImage image)
 {
-	// Add timestamp
-	image.Timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-
 	// put to queue
 	if (m_FifoImage.Push(image) == false)
 	{
