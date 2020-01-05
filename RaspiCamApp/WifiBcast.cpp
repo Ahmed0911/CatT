@@ -18,6 +18,8 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <algorithm>
+#include <cstring>
 #include "fec.h"
 
 
@@ -55,95 +57,39 @@ void set_port_no(uint8_t *pu, uint8_t port) {
 	pu[sizeof(u8aRadiotapHeader) + DST_MAC_LASTBYTE] = port;
 }
 
-
-typedef struct {
-	int seq_nr;
-	int fd;
-	int curr_pb;
-	packet_buffer_t *pbl;
-} fifo_t;
-
 	
 
-int packet_header_init(uint8_t *packet_header) {
-			u8 *pu8 = packet_header;
-			memcpy(packet_header, u8aRadiotapHeader, sizeof(u8aRadiotapHeader));
-			pu8 += sizeof(u8aRadiotapHeader);
-			memcpy(pu8, u8aIeeeHeader, sizeof (u8aIeeeHeader));
-			pu8 += sizeof (u8aIeeeHeader);
-					
-			//determine the length of the header
-			return pu8 - packet_header;
+int packet_header_init(uint8_t *packet_header) 
+{
+	u8 *pu8 = packet_header;
+	memcpy(packet_header, u8aRadiotapHeader, sizeof(u8aRadiotapHeader));
+	pu8 += sizeof(u8aRadiotapHeader);
+	memcpy(pu8, u8aIeeeHeader, sizeof (u8aIeeeHeader));
+	pu8 += sizeof (u8aIeeeHeader);
+			
+	//determine the length of the header
+	return pu8 - packet_header;
 }
 
-void fifo_init(fifo_t *fifo, int fifo_count, int block_size) {
+void fifo_init(fifo_t *fifo, int fifo_count, int block_size) 
+{
 	int i;
 
-	for(i=0; i<fifo_count; ++i) {
+	for(i=0; i<fifo_count; ++i) 
+	{
 		int j;
 
 		fifo[i].seq_nr = 0;
-		fifo[i].fd = -1;
 		fifo[i].curr_pb = 0;
 		fifo[i].pbl = lib_alloc_packet_buffer_list(block_size, MAX_PACKET_LENGTH);
 
 		//prepare the buffers with headers
-		for(j=0; j<block_size; ++j) {
+		for(j=0; j<block_size; ++j) 
+		{
 			fifo[i].pbl[j].len = 0;
 		}
 	}
 
-}
-
-void fifo_open(fifo_t *fifo, int fifo_count) {
-	int i;
-	if(fifo_count > 1) {
-		//new FIFO style
-		
-		//first, create all required fifos
-		for(i=0; i<fifo_count; ++i) {
-			char fn[256];
-			sprintf(fn, FIFO_NAME, i);
-			
-			unlink(fn);
-			if(mkfifo(fn, 0666) != 0) {
-				fprintf(stderr, "Error creating FIFO \"%s\"\n", fn);
-				exit(1);
-			}
-		}
-		
-		//second: wait for the data sources to connect
-		for(i=0; i<fifo_count; ++i) {
-			char fn[256];
-			sprintf(fn, FIFO_NAME, i);
-			
-			printf("Waiting for \"%s\" being opened from the data source... \n", fn);			
-			if((fifo[i].fd = open(fn, O_RDONLY)) < 0) {
-				fprintf(stderr, "Error opening FIFO \"%s\"\n", fn);
-				exit(1);
-			}
-			printf("OK\n");
-		}
-	}
-	else {
-		//old style STDIN input
-		fifo[0].fd = STDIN_FILENO;
-	}
-}
-
-
-void fifo_create_select_set(fifo_t *fifo, int fifo_count, fd_set *fifo_set, int *max_fifo_fd) {
-	int i;
-
-	FD_ZERO(fifo_set);
-	
-	for(i=0; i<fifo_count; ++i) {
-		FD_SET(fifo[i].fd, fifo_set);
-
-		if(fifo[i].fd > *max_fifo_fd) {
-			*max_fifo_fd = fifo[i].fd;
-		}
-	}
 }
 
 
@@ -226,36 +172,16 @@ void pb_transmit_block(packet_buffer_t *pbl, pcap_t *ppcap, int *seq_nr, int por
 
 WifiBcast::WifiBcast(std::string lanInterface)
 {
-char szErrbuf[PCAP_ERRBUF_SIZE];
-	int i;
-	char fBrokenSocket = 0;
-	int pcnt = 0;
-	time_t start_time;
-    uint8_t packet_transmit_buffer[MAX_PACKET_LENGTH];
-	size_t packet_header_length = 0;
-	fd_set fifo_set;
-	int max_fifo_fd = -1;
-	fifo_t fifo[MAX_FIFOS];
-
-	int param_transmission_count = 1;
-    int param_data_packets_per_block = 8;
-    int param_fec_packets_per_block = 4;
-	int param_packet_length = MAX_USER_PACKET_LENGTH;
-	int param_port = 0;
-	int param_min_packet_length = 0;
 	int param_fifo_count = 1;
 
-    packet_header_length = packet_header_init(packet_transmit_buffer);
-	fifo_init(fifo, param_fifo_count, param_data_packets_per_block);
-	fifo_open(fifo, param_fifo_count);
-	fifo_create_select_set(fifo, param_fifo_count, &fifo_set, &max_fifo_fd);
-
+    _packetHeaderLength = packet_header_init(_packetTransmitBuffer);
+	fifo_init(_fifo, param_fifo_count, _paramDataPacketsPerBlock);
 
 	//initialize forward error correction
 	fec_init();
 
-
 	// open the interface in pcap
+	char szErrbuf[PCAP_ERRBUF_SIZE];
 	szErrbuf[0] = '\0';
 	_ppcap = pcap_open_live(lanInterface.c_str(), 800, 1, 20, szErrbuf);
 	if (_ppcap == NULL) 
@@ -266,91 +192,6 @@ char szErrbuf[PCAP_ERRBUF_SIZE];
 
 
 	pcap_setnonblock(_ppcap, 0, szErrbuf);
-
-
-	start_time = time(NULL);
-	while (!fBrokenSocket) 
-	{
-		fd_set rdfs;
-		int ret;
-
-		rdfs = fifo_set;
-
-		//wait for new data on the fifos
-		ret = select(max_fifo_fd + 1, &rdfs, NULL, NULL, NULL);
-
-		if(ret < 0) 
-		{
-			perror("select");
-			return;
-		}
-
-		//cycle through all fifos and look for new data
-		for(i=0; i<param_fifo_count && ret; ++i) 
-		{
-			if(!FD_ISSET(fifo[i].fd, &rdfs)) 
-			{
-				continue;
-			}
-
-			ret--;
-
-			packet_buffer_t *pb = fifo[i].pbl + fifo[i].curr_pb;
-			
-			//if the buffer is fresh we add a payload header
-			if(pb->len == 0) 
-			{
-				pb->len += sizeof(payload_header_t); //make space for a length field (will be filled later)
-			}
-
-			//read the data
-			int inl = read(fifo[i].fd, pb->data + pb->len, param_packet_length - pb->len);
-			if(inl < 0 || inl > param_packet_length-pb->len)
-			{
-				perror("reading stdin");
-				return;
-			}
-
-			if(inl == 0) 
-			{
-				//EOF
-				fprintf(stderr, "Warning: Lost connection to fifo %d. Please make sure that a data source is connected\n", i);
-				usleep(1e5);
-				continue;
-			}
-
-			pb->len += inl;
-			
-			//check if this packet is finished
-			if(pb->len >= param_min_packet_length) 
-			{
-				payload_header_t *ph = (payload_header_t*)pb->data;
-				ph->data_length = pb->len - sizeof(payload_header_t); //write the length into the packet. this is needed since with fec we cannot use the wifi packet lentgh anymore. We could also set the user payload to a fixed size but this would introduce additional latency since tx would need to wait until that amount of data has been received
-				pcnt++;
-
-				//check if this block is finished
-				if(fifo[i].curr_pb == param_data_packets_per_block-1) 
-				{
-					pb_transmit_block(fifo[i].pbl, _ppcap, &(fifo[i].seq_nr), i+param_port, param_packet_length, packet_transmit_buffer, packet_header_length, param_data_packets_per_block, param_fec_packets_per_block, param_transmission_count);
-					fifo[i].curr_pb = 0;
-				}
-				else 
-				{
-					fifo[i].curr_pb++;
-				}
-			}
-		}
-
-
-		if(pcnt % 128 == 0) 
-		{
-			printf("%d data packets sent (interface rate: %.3f)\n", pcnt, 1.0 * pcnt / param_data_packets_per_block * (param_data_packets_per_block + param_fec_packets_per_block) / (time(NULL) - start_time));
-		}
-
-	}
-
-
-	printf("Broken socket\n");
 }
 	
 WifiBcast::~WifiBcast()
@@ -360,7 +201,48 @@ WifiBcast::~WifiBcast()
 
 void WifiBcast::SendData(uint8_t* buffer, uint32_t length)
 {
+	time_t start_time = time(NULL); // replace with chrono!!!
 
+	uint8_t* buffPtr = buffer;
+	uint32_t sentPackets = 0; // sent in this call
+	// send whole buffer, multiple blocks if needed
+	while(length > 0)
+	{
+		uint32_t i = 0; // only one FIFO!
+		packet_buffer_t *pb = _fifo[i].pbl + _fifo[i].curr_pb;
+		
+		//if the buffer is fresh we add a payload header
+		if(pb->len == 0) 
+		{
+			pb->len += sizeof(payload_header_t); //make space for a length field (will be filled later)
+		}
+
+		// copy the data to buffer
+		uint32_t copyLength = std::min(length, _paramPacketLength - pb->len); // remaining packet length OR remaining buffer
+		std::memcpy(pb->data + pb->len, buffPtr, copyLength);
+		buffPtr += copyLength;
+		pb->len += copyLength;
+
+		
+		//check if this packet is finished
+		payload_header_t *ph = (payload_header_t*)pb->data;
+		ph->data_length = pb->len - sizeof(payload_header_t); //write the length into the packet. this is needed since with fec we cannot use the wifi packet lentgh anymore. We could also set the user payload to a fixed size but this would introduce additional latency since tx would need to wait until that amount of data has been received
+		sentPackets++;
+
+		//check if this block is finished
+		if(_fifo[i].curr_pb == _paramDataPacketsPerBlock-1) 
+		{
+			pb_transmit_block(_fifo[i].pbl, _ppcap, &(_fifo[i].seq_nr), i, _paramPacketLength, _packetTransmitBuffer, _packetHeaderLength, _paramDataPacketsPerBlock, _paramFecPacketsPerBlock, _paramTransmissionCount);
+			_fifo[i].curr_pb = 0;
+		}
+		else 
+		{
+			_fifo[i].curr_pb++;
+		}
+	}
+	// debug stats
+	_statSentPackets += sentPackets; // total number of sent packets
+	printf("%d data packets sent (interface rate: %.3f), total: %ld\n", sentPackets, 1.0 * sentPackets / _paramDataPacketsPerBlock * (_paramDataPacketsPerBlock + _paramFecPacketsPerBlock) / (time(NULL) - start_time), _statSentPackets);
 }
 
 

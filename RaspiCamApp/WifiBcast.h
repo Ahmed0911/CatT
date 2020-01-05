@@ -41,13 +41,15 @@ typedef u32 __le32;
 
 #define	MAX_PENUMBRA_INTERFACES 8
 
-typedef struct {
+typedef struct 
+{
 	uint32_t received_packet_cnt;
 	uint32_t wrong_crc_cnt;
 	int8_t current_signal_dbm;
 } wifi_adapter_rx_status_t;
 
-typedef struct {
+typedef struct 
+{
 	time_t last_update;
 	uint32_t received_block_cnt;
 	uint32_t damaged_block_cnt;
@@ -57,26 +59,36 @@ typedef struct {
 	wifi_adapter_rx_status_t adapter[MAX_PENUMBRA_INTERFACES];
 } wifibroadcast_rx_status_t;
 
-typedef struct {
+typedef struct 
+{
 	int valid;
 	int crc_correct;
-	size_t len; //this is the actual length of the packet stored in data
+	uint32_t len; //this is the actual length of the packet stored in data
 	uint8_t *data;
 } packet_buffer_t;
 
+typedef struct 
+{
+	int seq_nr;
+	int curr_pb;
+	packet_buffer_t *pbl;
+} fifo_t;
 
 //this sits at the payload of the wifi packet (outside of FEC)
-typedef struct {
+typedef struct 
+{
     uint32_t sequence_number;
 } __attribute__((packed)) wifi_packet_header_t;
 
 //this sits at the data payload (which is usually right after the wifi_packet_header_t) (inside of FEC)
-typedef struct {
+typedef struct 
+{
     uint32_t data_length;
 } __attribute__((packed)) payload_header_t;
 
-
 packet_buffer_t *lib_alloc_packet_buffer_list(size_t num_packets, size_t packet_length);
+
+
 
 class WifiBcast
 {
@@ -88,6 +100,18 @@ public:
 
 private:
 	pcap_t* _ppcap = NULL;
+
+	uint32_t _paramTransmissionCount = 1;
+    uint32_t _paramDataPacketsPerBlock = 8;
+    uint32_t _paramFecPacketsPerBlock = 4;
+	uint32_t _paramPacketLength = MAX_USER_PACKET_LENGTH;
+	uint32_t _packetHeaderLength = 0;
+
+    uint8_t _packetTransmitBuffer[MAX_PACKET_LENGTH];
+	fifo_t _fifo[MAX_FIFOS];
+
+	// statistics
+	uint64_t _statSentPackets = 0;
 };
 
 
