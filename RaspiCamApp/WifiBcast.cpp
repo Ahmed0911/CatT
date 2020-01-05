@@ -222,7 +222,7 @@ void WifiBcast::SendData(uint8_t* buffer, uint32_t length)
 		std::memcpy(pb->data + pb->len, buffPtr, copyLength);
 		buffPtr += copyLength;
 		pb->len += copyLength;
-
+		length -= copyLength;
 		
 		//check if this packet is finished
 		payload_header_t *ph = (payload_header_t*)pb->data;

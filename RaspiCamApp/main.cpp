@@ -31,7 +31,7 @@ int main()
 		SImage image = camSource.getImage();
 
 		wifiCast.SendData(image.ImagePtr, image.Size);
-
+		//delete [] image.ImagePtr;
 		// Update Comm Data
 		commMgr.SetData(data);
 		commMgr.PushImage(image);		
