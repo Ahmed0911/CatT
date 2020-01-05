@@ -3,6 +3,7 @@
 #include "CommonStructs.h"
 #include "CommunicationMgr.h"
 #include "CamSourceV4L2.h"
+#include "WifiBcast.h"
 
 // Server
 #define TCPINTERFACE "0.0.0.0"
@@ -17,7 +18,8 @@ int main()
 	// Start Server
 	std::cout << "Starting Communication Manager...\n";
 	CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
-	CamSourceV4L2 camSource(VIDEODEV);
+	CamSourceV4L2 camSource{ VIDEODEV };
+	WifiBcast wifiCast{"wlan1"};
 
 	// Main Loop
 	for(int i=0; i!=5000; i++)
@@ -27,6 +29,8 @@ int main()
 		data.Timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count(); // microseconds after epoch, this is not steady clock!
 
 		SImage image = camSource.getImage();
+
+		wifiCast.SendData(image.ImagePtr, image.Size);
 
 		// Update Comm Data
 		commMgr.SetData(data);

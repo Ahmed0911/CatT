@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <sys/mman.h>
+#include <string>
 
 
 #define MAX_PACKET_LENGTH 4192
@@ -76,4 +77,17 @@ typedef struct {
 
 
 packet_buffer_t *lib_alloc_packet_buffer_list(size_t num_packets, size_t packet_length);
+
+class WifiBcast
+{
+public:
+	WifiBcast(std::string lanInterface);
+	virtual ~WifiBcast();
+
+	void SendData(uint8_t* buffer, uint32_t length);
+
+private:
+	pcap_t* _ppcap = NULL;
+};
+
 

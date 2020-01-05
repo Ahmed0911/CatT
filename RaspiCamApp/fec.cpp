@@ -107,7 +107,7 @@ typedef unsigned char gf;
  * Primitive polynomials - see Lin & Costello, Appendix A,
  * and  Lee & Messerschmitt, p. 453.
  */
-static char *allPp[] = {    /* GF_BITS	polynomial		*/
+static const char *allPp[] = {    /* GF_BITS	polynomial		*/
     NULL,		    /*  0	no code			*/
     NULL,		    /*  1	no code			*/
     "111",		    /*  2	1+x+x^2			*/
@@ -178,7 +178,7 @@ __attribute__((aligned (256)))
 
 #define gf_mul(x,y) gf_mul_table[(x<<8)+y]
 
-#define USE_GF_MULC register gf * __gf_mulc_
+#define USE_GF_MULC gf * __gf_mulc_
 #define GF_MULC0(c) __gf_mulc_ = &gf_mul_table[(c)<<8]
 #define GF_ADDMULC(dst, x) dst ^= __gf_mulc_[x]
 #define GF_MULC(dst, x) dst = __gf_mulc_[x]
@@ -216,7 +216,7 @@ generate_gf(void)
 {
     int i;
     gf mask;
-    char *Pp =  allPp[GF_BITS] ;
+    char *Pp =  (char*)allPp[GF_BITS] ;
 
     mask = 1;	/* x ** 0 = 1 */
     gf_exp[GF_BITS] = 0; /* will be updated at the end of the 1st loop */
@@ -299,7 +299,7 @@ static void
 slow_addmul1(gf *dst1, gf *src1, gf c, int sz)
 {
     USE_GF_MULC ;
-    register gf *dst = dst1, *src = src1 ;
+    gf *dst = dst1, *src = src1 ;
     gf *lim = &dst[sz - UNROLL + 1] ;
 
     GF_MULC0(c) ;
@@ -425,7 +425,7 @@ static void
 slow_mul1(gf *dst1, gf *src1, gf c, int sz)
 {
     USE_GF_MULC ;
-    register gf *dst = dst1, *src = src1 ;
+    gf *dst = dst1, *src = src1 ;
     gf *lim = &dst[sz - UNROLL + 1] ;
 
     GF_MULC0(c) ;
