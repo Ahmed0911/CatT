@@ -109,6 +109,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="UDPClient.h" />
     <ClInclude Include="VideoScreen.h" />
     <ClInclude Include="VSMonitorApp.h" />
   </ItemGroup>
@@ -117,6 +118,7 @@
     <ClCompile Include="H264Decoder\H264Decoder.cpp" />
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="UDPClient.cpp" />
     <ClCompile Include="VideoScreen.cpp" />
     <ClCompile Include="VSMonitorApp.cpp" />
   </ItemGroup>

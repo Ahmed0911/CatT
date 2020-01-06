@@ -10,6 +10,8 @@
 #include "H264Decoder\H264Decoder.h"
 #include <fstream>
 #include <iostream>
+#include <array>
+#include "UDPClient.h"
 
 #define MAX_LOADSTRING 100
 #define TCPPORT 5000
@@ -67,7 +69,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VSMONITORAPP));
 
 		// Communication object
-		CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
+		//CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
+		UDPClient udpClient{ 12000 };
+		std::array<uint8_t, 100000> udpCommData;
 
 		// H264 Decoder
 		H264Decoder decoder{};
@@ -87,6 +91,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			else
 			{
 				// 1. Get new data/image
+#if 0
 				SClientData data;
 				commMgr.GetData(data);
 
@@ -104,6 +109,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 						bool videoFrameSizeChanged = g_VideoScreen->UpdateVideoFrame(videoFrameBuffer.get(), decoder.ImageWidth, decoder.ImageHeight);
 					}
 				}
+#endif
+				uint32_t len = udpClient.getData(udpCommData);
+				if (len > 0)
+				{
+					// Decode
+					bool newImage = decoder.Decode(udpCommData.data(), len);
+					// Update screen
+					if (newImage)
+					{
+						decoder.GetImage(videoFrameBuffer.get(), MAX_FRAME_SIZE);
+						bool videoFrameSizeChanged = g_VideoScreen->UpdateVideoFrame(videoFrameBuffer.get(), decoder.ImageWidth, decoder.ImageHeight);
+					}
+				}
+
 
 				// 2. Set new data
 
@@ -115,10 +134,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 				// XXX: DEBUG :XXX
 				std::wstring windowText;
-				windowText += L"   Time: ";
+				/*windowText += L"   Time: ";
 				windowText += std::to_wstring(data.Timestamp);
 				windowText += L"   FIFO: ";
-				windowText += std::to_wstring(commMgr.m_FifoImage.GetCount());
+				windowText += std::to_wstring(commMgr.m_FifoImage.GetCount());*/
 				windowText += L"   RenderTime: ";
 				windowText += std::to_wstring((int)g_VideoScreen->GetScreenTimeMSec());
 				SetWindowText(g_hWnd, windowText.c_str());

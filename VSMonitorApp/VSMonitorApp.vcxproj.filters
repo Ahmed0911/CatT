@@ -57,6 +57,9 @@
     <ClInclude Include="Fifo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UDPClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VSMonitorApp.cpp">
@@ -75,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CommunicationMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UDPClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
