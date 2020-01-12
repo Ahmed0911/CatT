@@ -4,6 +4,7 @@
 #include <iostream>
 #include "CommonStructs.h"
 #include "CommunicationMgr.h"
+#include "udpcomm.h"
 
 #define TCPINTERFACE "0.0.0.0"
 #define TCPPORT 5000
@@ -15,6 +16,7 @@ int main()
     std::cout << "Starting Communication Manager...\n";
 	
 	CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
+	udpcomm udpMgr{"192.168.0.19", 1234};
 
 	// Test Loop
 	while (1)
@@ -30,10 +32,14 @@ int main()
 		// Generate Dummy data
 		SImage image{ new uint8_t[DUMMYSIZE], DUMMYSIZE, true, 0};
 		for (uint32_t i = 0; i != image.Size; i++) image.ImagePtr[i] = static_cast<uint8_t>(i);
+	
+		// send data to udp
+		udpMgr.pushPacket(image.ImagePtr, 1234);
+
 		commMgr.PushImage(image);
 
 
 		// Wait a little, TBD
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	};
 }

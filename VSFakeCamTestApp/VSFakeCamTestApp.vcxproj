@@ -90,13 +90,16 @@
   <ItemGroup>
     <ClCompile Include="CommunicationMgr.cpp" />
     <ClCompile Include="tcpserver.cpp" />
+    <ClCompile Include="udpcomm.cpp" />
     <ClCompile Include="VSFakeCamTestApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppException.h" />
     <ClInclude Include="CommonStructs.h" />
     <ClInclude Include="CommunicationMgr.h" />
     <ClInclude Include="Fifo.h" />
     <ClInclude Include="tcpserver.h" />
+    <ClInclude Include="udpcomm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
