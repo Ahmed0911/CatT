@@ -18,6 +18,7 @@ int main()
 	CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
 	udpcomm udpMgr{"192.168.0.19", 1234};
 
+	udpMgr.setPacketRate(100);
 	// Test Loop
 	while (1)
 	{
@@ -34,12 +35,27 @@ int main()
 		for (uint32_t i = 0; i != image.Size; i++) image.ImagePtr[i] = static_cast<uint8_t>(i);
 	
 		// send data to udp
-		udpMgr.pushPacket(image.ImagePtr, 1234);
+		for (int i = 0; i != 20; i++)
+		{
+			udpMgr.pushPacket(image.ImagePtr, 1234);
+		}
 
 		commMgr.PushImage(image);
 
 
 		// Wait a little, TBD
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+		// dump statistics
+		static int x = 0;
+		if ((x++ % 100) == 0)
+		{
+			udpcomm::Statistics stats = udpMgr.getStats();
+			std::cout << "   sentPkt: " << stats.sentPackets;
+			std::cout << "   sentdBytes: " << stats.sentBytes;
+			std::cout << "   failedPkt: " << stats.failedPackets;
+			std::cout << "   trashedPkt: " << stats.trashedPackets;
+			std::cout << std::endl;
+		}
 	};
 }

@@ -69,19 +69,34 @@ void udpcomm::workerThread()
 				_packets.pop();
 			}
 		}
+
 		if (packet.buffer != nullptr)
 		{
-			// TODO: check status and update statistics
 			int sent = send(_udpSocket, (const char*)packet.buffer, packet.size, 0);
 			delete[] packet.buffer;
 			if (sent != packet.size)
 			{
-				// ERROR
+				_statistics.failedPackets++;
 			}
+			else
+			{
+				_statistics.sentPackets++;
+				_statistics.sentBytes += packet.size;
+			}
+		}
+		else
+		{
+			// no packets, wait
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 		
 		// sleep
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		if (_packetsPerSecond != 0)
+		{
+			double sleepTimeSecs = 1.0 / _packetsPerSecond;
+			uint64_t sleepTimeUS = (uint64_t)(sleepTimeSecs * 1e6);
+			std::this_thread::sleep_for(std::chrono::microseconds(sleepTimeUS));
+		}
 	}
 }
 
@@ -100,8 +115,9 @@ bool udpcomm::pushPacket(uint8_t* data, uint32_t length)
 	}
 	else
 	{
-		// kill packet
+		// buffer overflow, trash packet
 		delete[] packet.buffer;
+		_statistics.trashedPackets++;
 	}
 
 	return pushOk;
