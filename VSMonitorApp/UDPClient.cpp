@@ -25,7 +25,7 @@ UDPClient::UDPClient(uint16_t serverPort)
 	localaddr.sin_family = AF_INET;
 	localaddr.sin_port = htons(serverPort); // listening port
 	localaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	APPWIN32_CK(bind(_udpSocket, (sockaddr*)&localaddr, sizeof(localaddr)) < 0, "bind failed");
+	APPWIN32_CK(bind(_udpSocket, (sockaddr*)&localaddr, sizeof(localaddr)) == 0, "bind failed");
 
 	// Start thread
 	_running = true;
