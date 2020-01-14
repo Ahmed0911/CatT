@@ -15,9 +15,9 @@ udpcomm::udpcomm(std::string serverName, uint16_t serverPort, uint16_t localPort
 	APPWIN32_CK( _udpSocket != INVALID_SOCKET, "socket failed");
 
 	// Increase rcvBuffer
-	int32_t optval = 1024 * 1024 * 1024;
-	int optLen = sizeof(optval);
-	APPWIN32_CK(setsockopt(_udpSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optval, optLen) != SOCKET_ERROR, "SO_RCVBUF failed");
+	//int32_t optval = 1024 * 1024;
+	//int optLen = sizeof(optval);
+	//APPWIN32_CK(setsockopt(_udpSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optval, optLen) != SOCKET_ERROR, "SO_RCVBUF failed");
 	//APPWIN32_CK(getsockopt(_udpSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optval, &optLen) != SOCKET_ERROR, "SO_RCVBUF failed"); // check if size is set correctly
 
 	// Bind Socket to LocalPort
