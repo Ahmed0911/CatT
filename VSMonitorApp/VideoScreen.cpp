@@ -108,7 +108,8 @@ bool VideoScreen::UpdateVideoFrame(BYTE* imageBuffer, int sizeX, int sizeY)
 		sizeChanged = true;
 	}
 
-	m_pVideoFrame->CopyFromMemory(&D2D1::RectU(BORDER_SIZE, BORDER_SIZE, m_VideoFrameWithBorderSize.width - BORDER_SIZE, m_VideoFrameWithBorderSize.height - BORDER_SIZE), imageBuffer, m_VideoFrameSize.width * 4);
+	D2D1_RECT_U rectD = D2D1::Rect<UINT32>(BORDER_SIZE, BORDER_SIZE, m_VideoFrameWithBorderSize.width - BORDER_SIZE, m_VideoFrameWithBorderSize.height - BORDER_SIZE);
+	m_pVideoFrame->CopyFromMemory(&rectD, imageBuffer, m_VideoFrameSize.width * 4);
 
 	return sizeChanged;
 }
