@@ -15,7 +15,7 @@
 
 #define MAX_LOADSTRING 100
 #define TCPPORT 5000
-#define TCPINTERFACE "192.168.0.10"
+#define TCPINTERFACE "192.168.0.220"
 
 #define MAX_FRAME_SIZE (40*(1024*1024))
 
@@ -69,9 +69,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VSMONITORAPP));
 
 		// Communication object
-		//CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
-		UDPClient udpClient{ 12000 };
-		std::array<uint8_t, 100000> udpCommData;
+		CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
+		//UDPClient udpClient{ 12000 };
+		//std::array<uint8_t, 100000> udpCommData;
 
 		// H264 Decoder
 		H264Decoder decoder{};
@@ -91,7 +91,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			else
 			{
 				// 1. Get new data/image
-#if 0
+#if 1
 				SClientData data;
 				commMgr.GetData(data);
 
@@ -109,7 +109,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 						bool videoFrameSizeChanged = g_VideoScreen->UpdateVideoFrame(videoFrameBuffer.get(), decoder.ImageWidth, decoder.ImageHeight);
 					}
 				}
-#endif
+#else
 				uint32_t len = udpClient.getData(udpCommData);
 				if (len > 0)
 				{
@@ -122,7 +122,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 						bool videoFrameSizeChanged = g_VideoScreen->UpdateVideoFrame(videoFrameBuffer.get(), decoder.ImageWidth, decoder.ImageHeight);
 					}
 				}
-
+#endif
 
 				// 2. Set new data
 

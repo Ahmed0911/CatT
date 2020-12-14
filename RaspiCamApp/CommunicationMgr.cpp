@@ -76,11 +76,11 @@ bool CommunicationMgr::CommCallback(int32_t socket)
 
 		if (snt != image.Size) return false; // error, disconnect client
 	}
-	
 
-	// Send Data	
+
+	// Send Data
 /*	std::unique_lock<std::mutex> lk{ m_ClientDataMutex };
-	SClientData clientData = m_ClientData;	
+	SClientData clientData = m_ClientData;
 	lk.unlock();
 	if ( !SendHeader(socket, sizeof(clientData), SDataHeader::_Type::ClientData) ) return false; // error, disconnect client
 

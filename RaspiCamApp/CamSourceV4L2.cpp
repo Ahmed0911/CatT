@@ -43,8 +43,8 @@ CamSourceV4L2::CamSourceV4L2(std::string videoInput)
 	format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	//format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 	format.fmt.pix.pixelformat = V4L2_PIX_FMT_H264;
-	format.fmt.pix.width = 1280;
-	format.fmt.pix.height = 960;
+	format.fmt.pix.width = 1920;
+	format.fmt.pix.height = 1080;
 	if(ioctl(_videoDevice, VIDIOC_S_FMT, &format) < 0)
 	{
 		std::cerr << "VIDIOC_S_FMT ERROR" << std::endl;

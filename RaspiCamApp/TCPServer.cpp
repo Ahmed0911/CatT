@@ -88,7 +88,7 @@ void TCPServer::WorkerThread(std::string interfaceIP, uint16_t localPort)
 				{
 					std::cout << "No callback, ERROR" << std::endl << std::endl;
 					break; // no sense to do anything without callback
-				}								
+				}
 			} while (1);
 		}
 

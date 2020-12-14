@@ -23,12 +23,12 @@ int main()
 	CamSourceV4L2 camSource{ VIDEODEV };
 	CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
 	//WifiBcast wifiCast{"wlan1"};
-	udpcomm udpMgr{UDPSERVER, UDPPORT};
-	udpMgr.setPacketRate(2000);
+	//udpcomm udpMgr{UDPSERVER, UDPPORT};
+	//udpMgr.setPacketRate(2000);
 
 	// Main Loop
 	for(int i=0; i!=5000; i++)
-	{		
+	{
 		// Set some data
 		SClientData data;
 		data.Timestamp = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count(); // microseconds after epoch, this is not steady clock!
@@ -39,6 +39,7 @@ int main()
 		//wifiCast.SendData(image.ImagePtr, image.Size);
 
 		// UDP Sender
+#if 0
 		uint32_t remainingSize = image.Size;
 		uint8_t* imgPtr = image.ImagePtr;
 		while( remainingSize > 0)
@@ -48,12 +49,12 @@ int main()
 			remainingSize -= sentBytes;
 			imgPtr+= sentBytes;
 		}
-
+#endif
 		//delete [] image.ImagePtr;
 		// Update Comm Data
 		commMgr.SetData(data);
-		commMgr.PushImage(image);		
-	}	
+		commMgr.PushImage(image);
+	}
 
 	return EXIT_SUCCESS;
 }
