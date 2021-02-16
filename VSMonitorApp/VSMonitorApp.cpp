@@ -69,9 +69,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VSMONITORAPP));
 
 		// Communication object
-		CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
-		//UDPClient udpClient{ 12000 };
-		//std::array<uint8_t, 100000> udpCommData;
+		//CommunicationMgr commMgr{ TCPINTERFACE, TCPPORT };
+		UDPClient udpClient{ 15000 };
+		std::unique_ptr<uint8_t[]> udpCommData{ new uint8_t[1000000] };
+		uint64_t totalReceived = 0;
+		uint64_t frameCount = 0;
 
 		// H264 Decoder
 		H264Decoder decoder{};
@@ -91,45 +93,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			else
 			{
 				// 1. Get new data/image
-#if 1
-				SClientData data;
-				commMgr.GetData(data);
-
-				SImage image{};
-				if (commMgr.PullImage(image))
-				{
-					// Decode
-					bool newImage = decoder.Decode(image.ImagePtr, image.Size);
-					delete[] image.ImagePtr;
-
-					// Update screen
-					if (newImage)
-					{
-						decoder.GetImage(videoFrameBuffer.get(), MAX_FRAME_SIZE);
-						bool videoFrameSizeChanged = g_VideoScreen->UpdateVideoFrame(videoFrameBuffer.get(), decoder.ImageWidth, decoder.ImageHeight);
-					}
-				}
-#else
-				uint32_t len = udpClient.getData(udpCommData);
+				uint32_t len = udpClient.getDataDirect(udpCommData.get());
 				if (len > 0)
 				{
 					// Decode
-					bool newImage = decoder.Decode(udpCommData.data(), len);
+					bool newImage = decoder.Decode(udpCommData.get(), len);
 					// Update screen
 					if (newImage)
 					{
 						decoder.GetImage(videoFrameBuffer.get(), MAX_FRAME_SIZE);
 						bool videoFrameSizeChanged = g_VideoScreen->UpdateVideoFrame(videoFrameBuffer.get(), decoder.ImageWidth, decoder.ImageHeight);
+
+						// Draw in main/render loop
+						InvalidateRect(msg.hwnd, NULL, FALSE);
+						UpdateWindow(g_hWnd); // redraw NOW
+
+						// update data
+						totalReceived += len;
+						frameCount++;
 					}
 				}
-#endif
 
 				// 2. Set new data
 
-
-				// Draw in main/render loop
-				InvalidateRect(msg.hwnd, NULL, FALSE);
-				UpdateWindow(g_hWnd); // redraw NOW
 
 
 				// XXX: DEBUG :XXX
@@ -138,8 +124,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				windowText += std::to_wstring(data.Timestamp);
 				windowText += L"   FIFO: ";
 				windowText += std::to_wstring(commMgr.m_FifoImage.GetCount());*/
-				windowText += L"   RenderTime: ";
-				windowText += std::to_wstring((int)g_VideoScreen->GetScreenTimeMSec());
+				windowText += L"   RenderTime [ms]: ";
+				windowText += std::to_wstring((float)g_VideoScreen->GetScreenTimeMSec());
+				windowText += L"     Frame Count [frames]: ";
+				windowText += std::to_wstring((int)frameCount);
+				windowText += L"     Bytes received [MB]: ";
+				windowText += std::to_wstring((float)totalReceived / (1024*1024));
 				SetWindowText(g_hWnd, windowText.c_str());
 
 				Sleep(1); // TODO: do not hang in minimized state?

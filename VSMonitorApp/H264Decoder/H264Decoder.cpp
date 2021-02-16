@@ -98,6 +98,7 @@ bool H264Decoder::Decode(uint8_t* Buffer, uint32_t Length)
 		memset(&mfxVideoParams, 0, sizeof(mfxVideoParams));
 		mfxVideoParams.mfx.CodecId = MFX_CODEC_AVC;
 		mfxVideoParams.IOPattern = MFX_IOPATTERN_OUT_SYSTEM_MEMORY;
+		mfxVideoParams.mfx.DecodedOrder = 1; // low latency magic? wtf, check docs...
 
 		// Read a chunk of data from buffer into bit stream buffer
 		// - Parse bit stream, searching for header and fill video parameters structure

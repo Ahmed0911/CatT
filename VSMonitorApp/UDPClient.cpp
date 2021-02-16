@@ -20,6 +20,10 @@ UDPClient::UDPClient(uint16_t serverPort)
 	APPWIN32_CK(setsockopt(_udpSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optval, optLen) != SOCKET_ERROR, "SO_RCVBUF failed");
 	//APPWIN32_CK(getsockopt(_udpSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optval, &optLen) != SOCKET_ERROR, "SO_RCVBUF failed"); // check if size is set correctly
 
+	unsigned long iMode = 1; // non blocking mode
+	ioctlsocket(_udpSocket, FIONBIO, &iMode);
+
+
 	// Bind Socket to SERVERPORT
 	sockaddr_in localaddr{};
 	localaddr.sin_family = AF_INET;
@@ -28,8 +32,8 @@ UDPClient::UDPClient(uint16_t serverPort)
 	APPWIN32_CK(bind(_udpSocket, (sockaddr*)&localaddr, sizeof(localaddr)) == 0, "bind failed");
 
 	// Start thread
-	_running = true;
-	_workerThread = std::thread(&UDPClient::workerThread, this);
+	//_running = true;
+	//_workerThread = std::thread(&UDPClient::workerThread, this);
 }
 
 UDPClient::~UDPClient()
@@ -66,7 +70,7 @@ void UDPClient::workerThread()
 	}
 }
 
-uint32_t UDPClient::getData(std::array<uint8_t, 100000>& data)
+uint32_t UDPClient::getData(std::array<uint8_t, 200000>& data)
 {
 	std::lock_guard<std::mutex> lk{ _dataMutex };
 	uint32_t filledIndex = 0;
@@ -80,4 +84,20 @@ uint32_t UDPClient::getData(std::array<uint8_t, 100000>& data)
 	}
 
 	return filledIndex;
+}
+
+uint32_t UDPClient::getDataDirect(uint8_t* data)
+{
+	char buff[2000];
+	int32_t received = recv(_udpSocket, buff, 2000, 0 );
+	uint32_t index = 0;
+
+	while (received > 0)
+	{
+		memcpy(&data[index], buff, received);
+		index += received;
+		received = recv(_udpSocket, buff, 2000, 0);
+	};
+
+	return index;
 }

@@ -13,7 +13,8 @@ public:
 	UDPClient(uint16_t serverPort);
 	virtual ~UDPClient();
 
-	uint32_t getData(std::array<uint8_t, 100000>& data);
+	uint32_t getData(std::array<uint8_t, 200000>& data);
+	uint32_t getDataDirect(uint8_t* data);
 
 private:
 	SOCKET _udpSocket = -1;
